@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Net.Sockets;
+using System.Net;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +21,19 @@ namespace PROG280__Remote_Access_App_Client__
         public MainWindow()
         {
             InitializeComponent();
+
+        }
+
+        public async void Connect(long ipAddress)
+        {
+            var ipEndPoint = new IPEndPoint(ipAddress, 13);
+
+            using TcpClient client = new();
+            await client.ConnectAsync(ipEndPoint);
+            await using NetworkStream stream = client.GetStream();
+
+            var buffer = new byte[1_024];
+            await stream.WriteAsync(buffer);
         }
     }
 }

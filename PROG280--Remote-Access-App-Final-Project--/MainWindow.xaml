@@ -5,8 +5,36 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PROG280__Remote_Access_App_Server__"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Remote Desktop Server App" Height="450" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
+        <Label FontWeight="Bold" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center">Server Status:</Label>
+        <Label x:Name="lblServerStatus" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Foreground="Red">Offline</Label>
+        <Button Grid.Column="4" x:Name="Start" Click="Start_Click" Height="30" Grid.ColumnSpan="2">Start</Button>
+
+        <ListBox x:Name="lbServerMessages" Grid.Row="1" Grid.ColumnSpan="12" Grid.RowSpan="5"></ListBox>
     </Grid>
 </Window>
