@@ -1,4 +1,4 @@
-﻿using PROG280__Remote_Access_App_Final_Project__;
+﻿using PROG280__Remote_Access_App_Server__;
 using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
@@ -26,6 +26,23 @@ namespace PROG280__Remote_Access_App_Server__
 
         private bool _isOnline = false;
         private bool _clientConnected = false;
+        private int _port;
+
+        public int Port {
+            get { return _port; }
+            set 
+            {
+                if(int.TryParse(value.ToString(), out int parsedValue))
+                {
+                    _port = parsedValue;
+                    LocalServerMessage($"Port set to {_port}.");
+                }
+                else
+                {
+                    ServerStatusUpdate("Invalid Port Detected.");
+                };
+            }
+        }
 
         public bool IsOnline
         {
@@ -41,13 +58,11 @@ namespace PROG280__Remote_Access_App_Server__
                     switch (_isOnline)
                     {
                         case false:
-                            lblServerStatus.Foreground = Brushes.Red;
-                            lblServerStatus.Content = "Offline";
+                            ServerStatusUpdate("Offline.");
                             break;
 
                         default:
-                            lblServerStatus.Foreground = Brushes.Green;
-                            lblServerStatus.Content = "Online";
+                            ServerStatusUpdate("Online.");
                             break;
                     }
                     OnPropertyChanged();
@@ -61,6 +76,22 @@ namespace PROG280__Remote_Access_App_Server__
             DataContext = this;
             LocalServerMessage += SendToMessageList;
         }
+
+        private void ServerStatusUpdate(string message)
+        {
+            if (message == "Online.")
+            {
+                lblServerStatus.Foreground = Brushes.Green;
+            }
+            else
+            {
+                lblServerStatus.Foreground = Brushes.Red;
+            }
+
+            lblServerStatus.Content = message;
+            OnPropertyChanged();
+        }
+
 
         public void SendToMessageList(string message)
         {
@@ -76,8 +107,8 @@ namespace PROG280__Remote_Access_App_Server__
 
         private async void Start_Click(object sender, RoutedEventArgs e)
         {
-            TcpListener tcpListener = new(IPAddress.Any, 8000);
-            LocalServerMessage($"Listening on port 8000");
+            TcpListener tcpListener = new(IPAddress.Any, Port);
+            LocalServerMessage($"Listening on port {Port}.");
             tcpListener.Start();
 
             while(!_clientConnected)
@@ -85,7 +116,7 @@ namespace PROG280__Remote_Access_App_Server__
                 try
                 {
                     using TcpClient handler = await tcpListener.AcceptTcpClientAsync();
-                    LocalServerMessage($"Connection Established with {handler.Client.RemoteEndPoint}");
+                    LocalServerMessage($"Connection Established with {handler.Client.RemoteEndPoint} on port {Port}.");
                 }
                 catch (Exception ex) 
                 {

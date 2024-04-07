@@ -33,7 +33,12 @@
 
         <Label FontWeight="Bold" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center">Server Status:</Label>
         <Label x:Name="lblServerStatus" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Foreground="Red">Offline</Label>
-        <Button Grid.Column="4" x:Name="Start" Click="Start_Click" Height="30" Grid.ColumnSpan="2">Start</Button>
+        
+
+        <Label Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold">Port:</Label>
+        <TextBox Grid.Column="4" x:Name="txtPort" Height="30" VerticalContentAlignment="Center"></TextBox>
+
+        <Button Grid.Column="6" x:Name="Start" Click="Start_Click" Height="30" Grid.ColumnSpan="2">Start</Button>
 
         <ListBox x:Name="lbServerMessages" Grid.Row="1" Grid.ColumnSpan="12" Grid.RowSpan="5"></ListBox>
     </Grid>
