@@ -14,6 +14,7 @@ using PROG280__Remote_Access_App_Data__;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Net.Http;
+using System.Xml.Serialization;
 
 namespace PROG280__Remote_Access_App_Client__
 {
@@ -51,51 +52,35 @@ namespace PROG280__Remote_Access_App_Client__
             InitializeComponent();
             DataContext = _connectionManager;
             LocalMessageEvent += _connectionManager!.AddToMessagesList;
+            LocalMessageEvent += ServerStatusUpdate;
         }
 
         ~MainWindow()
         {
             _connectionManager.TcpListener!.Stop();
+            _connectionManager.TcpListener.Dispose();
             _connectionManager.TcpClient!.Dispose();
         }
 
         private void ServerStatusUpdate(string message)
         {
-            if (message == "Online.")
+            if (message == "Server started!")
             {
                 lblAppStatus.Foreground = Brushes.Green;
             }
             else
             {
-                lblAppStatus.Foreground = Brushes.Red;
+                lblAppStatus.Foreground = Brushes.Black;
             }
 
-            lblAppStatus.Content = message;
+            lblAppStatus.Text = message;
         }
 
-        private void Stop_Click(object sender, RoutedEventArgs e)
+        private async void Stop_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                LocalMessageEvent("Stopping server...");
-                _connectionManager.TcpListener!.Stop();
-
-                if (_connectionManager.TcpClient != null)
-                    _connectionManager.TcpClient!.Close();
-
-                ServerStatusUpdate("Offline.");
-                LocalMessageEvent("Server stopped.");
-                btnStartServer.Click -= Stop_Click;
-                btnStartServer.Click += btnStartServer_Click;
-                btnStartServer.Content = "Start a Server";
-                btnRequestConnection.IsEnabled = true;
-                txtServerIp.IsEnabled = true;
-                txtPort.IsEnabled = true;
-            }
-            catch (Exception ex)
-            {
-                LocalMessageEvent($"Something went wrong, error: {ex.Message}");
-            }
+            LocalMessageEvent("Stopping server...");
+            ChangeServerButtons();
+            await Task.Delay(1000);
         }
 
         private void btnLogs_Click(object sender, RoutedEventArgs e)
@@ -103,46 +88,110 @@ namespace PROG280__Remote_Access_App_Client__
 
         }
 
+        private void StartServer()
+        {
+            LocalMessageEvent("Starting server...");
+            _connectionManager.TcpListener = new(IPAddress.Any, _connectionManager.Port);
+            _connectionManager.TcpListener.Start();
+            LocalMessageEvent("Server started!");
+        }
+
+        private void ChangeServerButtons()
+        {
+            switch (btnStartServer.Content)
+            {
+                case "Stop the Server":
+                    try
+                    {
+                        _connectionManager.TcpListener!.Stop();
+
+                        if (_connectionManager.TcpClient != null)
+                            _connectionManager.TcpClient!.Close();
+
+                        LocalMessageEvent("Server stopped.");
+                        btnStartServer.Click -= Stop_Click;
+                        btnStartServer.Click += btnStartServer_Click;
+                        btnStartServer.Content = "Start a Server";
+                        btnRequestConnection.IsEnabled = true;
+                        txtServerIp.IsEnabled = true;
+                        txtPort.IsEnabled = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        LocalMessageEvent($"Something went wrong, error: {ex.Message}");
+                    }
+                    break;
+
+                case "Start a Server":
+                    btnStartServer.Click -= btnStartServer_Click;
+                    btnStartServer.Click += Stop_Click;
+                    btnStartServer.Content = "Stop the Server";
+
+                    btnRequestConnection.IsEnabled = false;
+                    txtServerIp.IsEnabled = false;
+                    txtPort.IsEnabled = false;
+                    break;
+            }
+        }
+
+        private bool TryRetreiveIP()
+        {
+            try
+            {
+                string hostName = Dns.GetHostName();
+                List<IPAddress> localIPs = Dns.GetHostAddresses(hostName).ToList();
+
+                for (int i = 0; i < localIPs.Count - 1; i++)
+                {
+                    string ipstring = localIPs[i].ToString();
+                    if (ipstring.Contains(":"))
+                    {
+                        localIPs.RemoveAt(i);
+                        i--;
+                    }
+                    else
+                        LocalMessageEvent($"Found IP: {ipstring}");
+                }
+
+                txtServerIp.Text = $"{localIPs[0]}";
+
+                LocalMessageEvent($"Selected IP: {txtServerIp.Text}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                txtServerIp.Text = "ERROR";
+                LocalMessageEvent($"{ex.Message}");
+                return false;
+            }
+        }
+
         private async void btnStartServer_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                LocalMessageEvent("Starting server...");
-                _connectionManager.TcpListener = new(IPAddress.Any, _connectionManager.Port);
-                _connectionManager.TcpListener.Start();
-                LocalMessageEvent("Server started!");
-                ServerStatusUpdate("Online.");
+                StartServer();
+                await Task.Delay(1000);
 
                 LocalMessageEvent($"Listening on port {_connectionManager.Port}.");
+                await Task.Delay(1000);
 
-                btnStartServer.Click -= btnStartServer_Click;
-                btnStartServer.Click += Stop_Click;
-                btnStartServer.Content = "Stop the Server";
+                ChangeServerButtons();
 
-                btnRequestConnection.IsEnabled = false;
-                txtServerIp.IsEnabled = false;
-                txtPort.IsEnabled = false;
+                LocalMessageEvent("Retreiving external IP...");
+                await Task.Delay(1000);
 
-                //ChatGPT get external IP.
-                try
+                if (!TryRetreiveIP())
                 {
-                    using (var httpClient = new HttpClient())
-                    {
-                        var response = await httpClient.GetAsync("http://api.ipify.org");
-                        response.EnsureSuccessStatusCode();
-                        txtServerIp.Text = await response.Content.ReadAsStringAsync();
-                    }
+                    return;
                 }
-                catch (Exception ex)
-                {
-                    txtServerIp.Text = "ERROR";
-                }
-                
+                await Task.Delay(1000);
 
                 while (!_connectionManager.IsConnected)
                 {
+                    LocalMessageEvent("Listening...");
                     _connectionManager.TcpClient = await _connectionManager.TcpListener!.AcceptTcpClientAsync();
-                    LocalMessageEvent($"Connection Established with {_connectionManager.TcpClient.Client.RemoteEndPoint} on port {_connectionManager.Port}.");
+                    LocalMessageEvent($"Connection Established with {_connectionManager.TcpClient.Client.RemoteEndPoint}.");
                 }
             }
             catch (Exception ex)

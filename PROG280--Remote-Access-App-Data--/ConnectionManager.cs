@@ -13,7 +13,7 @@ namespace PROG280__Remote_Access_App_Data__
     public class ConnectionManager
     {
         private bool _isConnected = false;
-        private int _port;
+        private int _port = 8000;
 
         private TcpListener? _tcpListener;
         private TcpClient? _tcpClient;
