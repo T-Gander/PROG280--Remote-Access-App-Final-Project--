@@ -78,7 +78,7 @@ namespace PROG280__Remote_Access_App_Server__
                 btnStart.Click += Stop_Click;
                 btnStart.Content = "Stop";
 
-                while (!_connectionManager.ConnectionStatus)
+                while (!_connectionManager.IsConnected)
                 {
                     _connectionManager.TcpClient = await _connectionManager.TcpListener!.AcceptTcpClientAsync();
                     LocalMessageEvent($"Connection Established with {_connectionManager.TcpClient.Client.RemoteEndPoint} on port {_connectionManager.Port}.");

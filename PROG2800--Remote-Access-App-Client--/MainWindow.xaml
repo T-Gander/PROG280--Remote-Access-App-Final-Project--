@@ -31,15 +31,17 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Label FontWeight="Bold" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center">IP Address:</Label>
-        <TextBox x:Name="lblServerStatus" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center">Offline</TextBox>
+        <Label Grid.Column="1" VerticalAlignment="Center">Server IP:</Label>
+        <TextBox x:Name="txtServerIp" Grid.Column="2" Grid.ColumnSpan="2" Height="30" VerticalContentAlignment="Center"></TextBox>
+        <Label VerticalAlignment="Center" Grid.Column="4">Port:</Label>
+        <TextBox x:Name="txtPort" Grid.Column="5" Height="30" VerticalContentAlignment="Center">8000</TextBox>
+        <Button Grid.Column="7" x:Name="btnRequestConnection" Click="btnRequestConnection_Click" Height="30" Grid.ColumnSpan="2">Request Connection</Button>
+        <Label Grid.Column="9" VerticalAlignment="Center" HorizontalAlignment="Center">-Or-</Label>
+        <Button Grid.Column="10" x:Name="btnStartServer" Height="30" Grid.ColumnSpan="2" Click="btnStartServer_Click">Start a Server</Button>
 
+        <Label Margin="0,0,10,0" Grid.Row="2" Grid.RowSpan="3" VerticalAlignment="Center" Grid.Column="1" Grid.ColumnSpan="2" FontSize="40" HorizontalAlignment="Right">Status:</Label>
+        <Label x:Name="lblAppStatus" Margin="10,0,0,0" Grid.Row="2" Grid.RowSpan="3" VerticalAlignment="Center" Grid.Column="3" Grid.ColumnSpan="9" FontSize="40" HorizontalAlignment="Left">Waiting for Action...</Label>
 
-        <Label Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold">Port:</Label>
-        <TextBox Grid.Column="5" x:Name="txtPort" Height="30" VerticalContentAlignment="Center" Text="{Binding Path=Port, Mode=TwoWay}"/>
-
-        <Button Grid.Column="7" x:Name="Connect" Click="Connect_Click" Height="30" Grid.ColumnSpan="2">Connect</Button>
-
-        <Button Grid.Column="10" x:Name="Start" Height="30" Grid.ColumnSpan="1">Settings</Button>
+        <Button x:Name="btnLogs" Grid.Row="6" Grid.Column="10" Height="30" Grid.ColumnSpan="2" Click="btnLogs_Click">Logs</Button>
     </Grid>
 </Window>

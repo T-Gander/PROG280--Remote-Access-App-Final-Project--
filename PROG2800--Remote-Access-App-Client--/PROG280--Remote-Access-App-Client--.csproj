@@ -9,4 +9,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PROG280--Remote-Access-App-Data--\PROG280--Remote-Access-App-Data--.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -12,7 +12,7 @@ namespace PROG280__Remote_Access_App_Data__
 {
     public class ConnectionManager
     {
-        private bool _connectionStatus = false;
+        private bool _isConnected = false;
         private int _port;
 
         private TcpListener? _tcpListener;
@@ -43,12 +43,12 @@ namespace PROG280__Remote_Access_App_Data__
                 {
                     _tcpClient = value;
                     _isServer = false;
-                    ConnectionStatus = true;
+                    IsConnected = true;
                 }
                 else
                 {
                     _tcpClient = value;
-                    ConnectionStatus = false;
+                    IsConnected = false;
                 }
             }
         }
@@ -81,17 +81,17 @@ namespace PROG280__Remote_Access_App_Data__
             }
         }
 
-        public bool ConnectionStatus
+        public bool IsConnected
         {
             get
             {
-                return _connectionStatus;
+                return _isConnected;
             }
             set
             {
-                if (_connectionStatus != value)
+                if (_isConnected != value)
                 {
-                    _connectionStatus = value;
+                    _isConnected = value;
                 }
             }
         }
