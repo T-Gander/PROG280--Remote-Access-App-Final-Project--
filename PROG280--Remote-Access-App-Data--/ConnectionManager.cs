@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Sockets;
@@ -9,40 +10,59 @@ using System.Threading.Tasks;
 
 namespace PROG280__Remote_Access_App_Data__
 {
-    public class ConnectionManager : INotifyPropertyChanged
+    public class ConnectionManager
     {
-        public delegate void LocalMessageDelegate(string message);
-        public event LocalMessageDelegate LocalMessageEvent;
-
         private bool _connectionStatus = false;
         private int _port;
-        public TcpListener? TcpListener;
-        public TcpClient? TcpClient;
+
+        private TcpListener? _tcpListener;
+        private TcpClient? _tcpClient;
+
+        public TcpListener? TcpListener
+        {
+            get
+            {
+                return _tcpListener;
+            }
+            set
+            {
+                _tcpListener = value;
+                _isServer = true;
+            }
+        }
+
+        public TcpClient? TcpClient
+        {
+            get
+            {
+                return _tcpClient;
+            }
+            set
+            {
+                if (_tcpClient != null)
+                {
+                    _tcpClient = value;
+                    _isServer = false;
+                    ConnectionStatus = true;
+                }
+                else
+                {
+                    _tcpClient = value;
+                    ConnectionStatus = false;
+                }
+            }
+        }
 
         //Where I got to, planning to have this class differentiate between client and server so that each can swap over.
         private bool _isServer = false;
 
-        private List<string> _messages = new List<string>();
+        private ObservableCollection<string> _messages = new ObservableCollection<string>();
 
-        public List<string> Messages { get { return _messages; } }
-
-        public ConnectionManager()
-        {
-            LocalMessageEvent += LocalMessageHandler;
-            LocalMessageEvent += AddToMessagesList;
-        }
+        public ObservableCollection<string> Messages { get { return _messages; } }
 
         public void AddToMessagesList(string message)
         {
             _messages.Add(message);
-        }
-
-        public void LocalMessageHandler(string message)
-        {
-            if(LocalMessageEvent != null)
-            {
-                LocalMessageEvent(message);
-            }
         }
 
         public int Port
@@ -56,10 +76,8 @@ namespace PROG280__Remote_Access_App_Data__
                 }
                 else
                 {
-                    LocalMessageEvent("Invalid Port Detected.");
                     _port = 0;
                 };
-                OnPropertyChanged();
             }
         }
 
@@ -74,26 +92,8 @@ namespace PROG280__Remote_Access_App_Data__
                 if (_connectionStatus != value)
                 {
                     _connectionStatus = value;
-                    switch (_connectionStatus)
-                    {
-                        case false:
-                            LocalMessageEvent("Disconnected.");
-                            break;
-
-                        default:
-                            LocalMessageEvent("Connected.");
-                            break;
-                    }
-                    OnPropertyChanged();
                 }
             }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
