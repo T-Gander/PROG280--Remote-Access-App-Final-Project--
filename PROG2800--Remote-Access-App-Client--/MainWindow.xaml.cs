@@ -35,5 +35,10 @@ namespace PROG280__Remote_Access_App_Client__
             var buffer = new byte[1_024];
             await stream.WriteAsync(buffer);
         }
+
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

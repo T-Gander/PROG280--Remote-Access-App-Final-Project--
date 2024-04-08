@@ -1,4 +1,5 @@
-﻿using PROG280__Remote_Access_App_Server__;
+﻿using PROG280__Remote_Access_App_Data__;
+using PROG280__Remote_Access_App_Server__;
 using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
@@ -21,60 +22,18 @@ namespace PROG280__Remote_Access_App_Server__
     /// </summary>
     public partial class MainWindow : INotifyPropertyChanged
     {
-        public delegate void LocalServerMessageDelegate(string message);
-        private event LocalServerMessageDelegate LocalServerMessage;
-
-        private bool _isOnline = false;
-        private bool _clientConnected = false;
-        private int _port;
-
-        public int Port {
-            get { return _port; }
-            set 
-            {
-                if(int.TryParse(value.ToString(), out int parsedValue))
-                {
-                    _port = parsedValue;
-                    LocalServerMessage($"Port set to {_port}.");
-                }
-                else
-                {
-                    ServerStatusUpdate("Invalid Port Detected.");
-                };
-            }
-        }
-
-        public bool IsOnline
-        {
-            get
-            {
-                return _isOnline;
-            }
-            set
-            {
-                if(_isOnline != value )
-                {
-                    _isOnline = value;
-                    switch (_isOnline)
-                    {
-                        case false:
-                            ServerStatusUpdate("Offline.");
-                            break;
-
-                        default:
-                            ServerStatusUpdate("Online.");
-                            break;
-                    }
-                    OnPropertyChanged();
-                }
-            }
-        }
+        private ConnectionManager _connectionManager;
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
-            LocalServerMessage += SendToMessageList;
+        }
+
+        ~MainWindow()
+        {
+            _connectionManager.TcpListener!.Stop();
+            _connectionManager.TcpClient!.Dispose();
         }
 
         private void ServerStatusUpdate(string message)
@@ -93,30 +52,28 @@ namespace PROG280__Remote_Access_App_Server__
         }
 
 
-        public void SendToMessageList(string message)
-        {
-            lbServerMessages.Items.Add(message);
-        }
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private async void Start_Click(object sender, RoutedEventArgs e)
         {
-            TcpListener tcpListener = new(IPAddress.Any, Port);
-            LocalServerMessage($"Listening on port {Port}.");
-            tcpListener.Start();
+            _connectionManager.LocalMessageHandler("Starting server...");
+            _connectionManager.TcpListener = new(IPAddress.Any, _connectionManager.Port);
+            _connectionManager.TcpListener.Start();
 
-            while(!_clientConnected)
+            _connectionManager.LocalMessageHandler($"Listening on port {_connectionManager.Port}.");
+
+            while (!_clientConnected)
             {
                 try
                 {
-                    using TcpClient handler = await tcpListener.AcceptTcpClientAsync();
-                    LocalServerMessage($"Connection Established with {handler.Client.RemoteEndPoint} on port {Port}.");
+                    tcpClient = await tcpListener.AcceptTcpClientAsync();
+                    _clientConnected = true;
+                    LocalServerMessage($"Connection Established with {tcpClient.Client.RemoteEndPoint} on port {Port}.");
                 }
                 catch (Exception ex) 
                 {
@@ -124,16 +81,6 @@ namespace PROG280__Remote_Access_App_Server__
                     break;
                 }
             }
-
-            if (_clientConnected)
-            {
-                IsOnline = true;
-            }
-            else
-            {
-                IsOnline = false;
-            }
-            
         }
     }
 }

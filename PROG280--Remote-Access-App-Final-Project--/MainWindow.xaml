@@ -36,7 +36,7 @@
         
 
         <Label Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold">Port:</Label>
-        <TextBox Grid.Column="4" x:Name="txtPort" Height="30" VerticalContentAlignment="Center"></TextBox>
+        <TextBox Grid.Column="4" x:Name="txtPort" Height="30" VerticalContentAlignment="Center" Text="{Binding Path=Port, Mode=TwoWay}"/>
 
         <Button Grid.Column="6" x:Name="Start" Click="Start_Click" Height="30" Grid.ColumnSpan="2">Start</Button>
 
