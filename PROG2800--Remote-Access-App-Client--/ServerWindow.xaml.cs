@@ -253,6 +253,7 @@ namespace PROG280__Remote_Access_App_Client__
             ConnectionManager.TcpClient = new TcpClient(ConnectionManager.IPAddress.ToString(), ConnectionManager.Port);
 
             await using NetworkStream stream = ConnectionManager.TcpClient.GetStream();
+            ConnectionManager.IsConnected = true;
 
             LocalMessageEvent($"Connected to {ConnectionManager.IPAddress}");
 
