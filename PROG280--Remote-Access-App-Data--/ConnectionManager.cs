@@ -126,45 +126,6 @@ namespace PROG280__Remote_Access_App_Data__
             }
         }
 
-        //public Task<Packet> Receive()
-        //{
-        //    switch (_isServer)
-        //    {
-        //        case true:
-        //            return ServerReceive();
-
-        //        case false:
-        //            return ClientReceive();
-        //    }
-        //}
-
-        //private async Task<Packet?> ServerReceive()
-        //{
-        //    NetworkStream stream = TcpClient!.GetStream();
-        //    while (IsConnected)
-        //    {
-        //        byte[] buffer = new byte[4096];
-        //        int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-        //        var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-        //        var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
-        //        if (packet != null)
-        //            return packet;
-        //    }
-        //    return null;
-        //}
-
-        //public async Task ServerSend(Packet packet)
-        //{
-        //    NetworkStream stream = TcpClient!.GetStream();
-        //    while (IsConnected)
-        //    {
-        //        byte[] buffer = new byte[4096];
-        //        var sendpacket = JsonConvert.SerializeObject(packet);
-        //        var packetbytes = Encoding.UTF8.GetBytes(sendpacket);
-        //        await stream.WriteAsync(packetbytes, 0, buffer.Length);
-        //    }
-        //}
-
         public async Task Send()
         {
             switch (_isServer)
