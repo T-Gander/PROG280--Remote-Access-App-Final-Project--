@@ -4,6 +4,7 @@ using PROG280__Remote_Access_App_Data__;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -70,7 +71,14 @@ namespace PROG2800__Remote_Access_App_Client__
                     break;
 
                 case Packet.MessageType.Frame:
-                    _RemoteWindowDataContext.Frame = JsonConvert.DeserializeObject<Bitmap>(packet.Payload);
+                    Bitmap deserializedPayload;
+
+                    using(MemoryStream mstream = new(JsonConvert.DeserializeObject<byte[]>(packet.Payload)))
+                    {
+                        deserializedPayload = new Bitmap(mstream);
+                    }
+
+                    _RemoteWindowDataContext.Frame = deserializedPayload;
                     break;
             }
         }

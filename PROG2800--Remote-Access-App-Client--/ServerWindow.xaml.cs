@@ -221,6 +221,10 @@ namespace PROG280__Remote_Access_App_Client__
                     {
                         await Listen();
                     }
+                    else
+                    {
+                        await ConnectionManager.Send();
+                    }
                     await Task.Delay(1000);
                 }
             }
@@ -238,7 +242,6 @@ namespace PROG280__Remote_Access_App_Client__
             LocalMessageEvent($"Connection Established with {ConnectionManager.TcpClient.Client.RemoteEndPoint}.");
             ConnectionManager.IsConnected = true;
 
-            await ConnectionManager.Send();
             await Task.Delay(1000);
         }
 

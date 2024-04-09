@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -81,17 +82,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
             set
             {
-                if (_tcpClient != null)
-                {
-                    _tcpClient = value;
-                    _isServer = false;
-                    IsConnected = true;
-                }
-                else
-                {
-                    _tcpClient = value;
-                    IsConnected = false;
-                }
+                _tcpClient = value;
             }
         }
 
@@ -182,12 +173,18 @@ namespace PROG280__Remote_Access_App_Data__
                     //Method to grab screen
                     //Create packet
                     //Send packet to client.
+                    byte[] bitmapBytes
 
                     Bitmap screen = GrabScreen();
-
+                    using (MemoryStream mstream = new())
+                    {
+                        screen.Save(mstream, ImageFormat.Png);
+                        bitmapBytes = mstream.ToArray();
+                    }
+                        
                     Packet screenPacket = new();
                     screenPacket.ContentType = MessageType.Frame;
-                    screenPacket.Payload = JsonConvert.SerializeObject(screen);
+                    screenPacket.Payload = JsonConvert.SerializeObject(bitmapBytes);
 
                     byte[] bytepacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(screenPacket));
 
