@@ -44,7 +44,7 @@ namespace PROG2800__Remote_Access_App_Client__
                 NetworkStream stream = ServerWindow.ConnectionManager.TcpClient!.GetStream();
                 while (ServerWindow.ConnectionManager.IsConnected)
                 {
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[1500];
                     int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
                     var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);

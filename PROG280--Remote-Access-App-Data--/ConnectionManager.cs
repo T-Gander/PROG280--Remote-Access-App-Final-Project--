@@ -158,7 +158,7 @@ namespace PROG280__Remote_Access_App_Data__
 
                         for (int i = 0; i < totalChunks - 1; i++)
                         {
-                            byte[] buffer = new byte[1024];
+                            byte[] buffer = new byte[1500];
                             int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
                             var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                             var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
