@@ -191,7 +191,11 @@ namespace PROG280__Remote_Access_App_Data__
                             Payload = JsonConvert.SerializeObject(totalChunks)
                         };
 
-                        for(int i = 0; i < totalChunks; i++)
+                        byte[] initialpacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(firstPacket));
+
+                        await TcpClient.GetStream().WriteAsync(initialpacket, 0, initialpacket.Length);
+
+                        for (int i = 0; i < totalChunks; i++)
                         {
                             Packet screenPacket = new();
                             screenPacket.ContentType = MessageType.Frame;
@@ -202,8 +206,7 @@ namespace PROG280__Remote_Access_App_Data__
                             byte[] chunk = new byte[length];
                             Buffer.BlockCopy(bitmapBytes, offset, chunk, 0, length);
 
-                            // Set payload as base64 string of chunk
-                            screenPacket.Payload = Convert.ToBase64String(chunk);
+                            screenPacket.Payload = JsonConvert.SerializeObject(chunk);
 
                             // Serialize packet and send
                             byte[] bytepacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(screenPacket));
