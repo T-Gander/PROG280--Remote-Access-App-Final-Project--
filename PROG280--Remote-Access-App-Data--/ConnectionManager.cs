@@ -194,10 +194,13 @@ namespace PROG280__Remote_Access_App_Data__
                         byte[] initialpacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(firstPacket));
 
                         NetworkStream stream = TcpClient!.GetStream();
-                        int bytesRead = Task.Run(async () => await stream.ReadAsync(new byte[1024], 0, 1024)).Result;
-                        
+                        await SendAcknowledgementPacket();
+                        stream.Close();
+                        //await Task.Delay(2);
+
                         for (int i = 0; i < totalChunks - 1; i++)
                         {
+                            NetworkStream newstream = TcpClient!.GetStream();
                             await stream.ReadAsync(new byte[chunkSize]);
 
                             Packet screenPacket = new();
