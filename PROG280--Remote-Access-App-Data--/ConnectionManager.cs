@@ -3,12 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media.Converters;
 using static PROG280__Remote_Access_App_Data__.Packet;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PROG280__Remote_Access_App_Data__
 {
@@ -17,9 +22,38 @@ namespace PROG280__Remote_Access_App_Data__
         private bool _isConnected = false;
         private int _port = 8000;
 
-        public long RemoteIPAddress { get; set; }
+        //private RemoteWindow _remoteWindow;
 
-        public long LocalIPAddress { get; set; }
+        private string _localIPAddress;
+
+        private string _remoteIPAddress;
+
+        public string IPAddress 
+        { 
+            get
+            {
+                switch (_isServer)
+                {
+                    case true:
+                        return _localIPAddress;
+
+                    case false:
+                        return _remoteIPAddress;
+                }
+            }
+            set 
+            {
+                switch (_isServer)
+                {
+                    case true:
+                        _localIPAddress = value;
+                        break;
+                    case false:
+                        _remoteIPAddress = value;
+                        break;
+                }
+            }
+        }
 
         private TcpListener? _tcpListener;
         private TcpClient? _tcpClient;
@@ -113,7 +147,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
         }
 
-        private async Task<Packet> ServerReceive()
+        private async Task<Packet?> ServerReceive()
         {
             NetworkStream stream = TcpClient!.GetStream();
             while (IsConnected)
@@ -128,9 +162,61 @@ namespace PROG280__Remote_Access_App_Data__
             return null;
         }
 
+        public async Task ServerSend(Packet packet)
+        {
+            NetworkStream stream = TcpClient!.GetStream();
+            while (IsConnected)
+            {
+                byte[] buffer = new byte[4096];
+                var sendpacket = JsonConvert.SerializeObject(packet);
+                var packetbytes = Encoding.UTF8.GetBytes(sendpacket);
+                await stream.WriteAsync(packetbytes, 0, buffer.Length);
+            }
+        }
+
+        public async Task Send()
+        {
+            switch (_isServer)
+            {
+                case true:
+                    //Method to grab screen
+                    //Create packet
+                    //Send packet to client.
+
+                    Bitmap screen = GrabScreen();
+
+                    Packet screenPacket = new();
+                    screenPacket.ContentType = MessageType.Frame;
+                    screenPacket.Payload = JsonConvert.SerializeObject(screen);
+
+                    byte[] bytepacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(screenPacket));
+
+                    NetworkStream stream = TcpClient!.GetStream();
+                    await stream.WriteAsync(bytepacket, 0, bytepacket.Length);
+
+                    screen.Dispose();
+                    
+                    break;
+
+                case false:
+                    break;
+            }
+        }
+        
+        public Bitmap GrabScreen()
+        {
+            Bitmap screenshot = new((int)SystemParameters.PrimaryScreenWidth, (int)SystemParameters.PrimaryScreenHeight, PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(screenshot))
+            {
+                g.CopyFromScreen(0, 0, 0, 0, screenshot.Size);
+            }
+
+            return screenshot;
+        }
+
         private async Task<Packet> ClientReceive()
         {
-            return new Packet();
+            return Receive().Result;
         }
     }
 }

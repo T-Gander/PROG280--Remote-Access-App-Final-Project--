@@ -213,10 +213,16 @@ namespace PROG280__Remote_Access_App_Client__
                 }
                 await Task.Delay(1000);
 
-                LocalMessageEvent("Listening...");
-                ConnectionManager.TcpClient = await ConnectionManager.TcpListener!.AcceptTcpClientAsync();
-                LocalMessageEvent($"Connection Established with {ConnectionManager.TcpClient.Client.RemoteEndPoint}.");
-                ConnectionManager.IsConnected = true;
+                await Listen();
+
+                while(true)
+                {
+                    if (!ConnectionManager.IsConnected)
+                    {
+                        await Listen();
+                    }
+                    await Task.Delay(1000);
+                }
             }
             catch (Exception ex)
             {
@@ -225,16 +231,27 @@ namespace PROG280__Remote_Access_App_Client__
             }
         }
 
+        private async Task Listen()
+        {
+            LocalMessageEvent("Listening...");
+            ConnectionManager.TcpClient = await ConnectionManager.TcpListener!.AcceptTcpClientAsync();
+            LocalMessageEvent($"Connection Established with {ConnectionManager.TcpClient.Client.RemoteEndPoint}.");
+            ConnectionManager.IsConnected = true;
+
+            await ConnectionManager.Send();
+            await Task.Delay(1000);
+        }
+
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
-            LocalMessageEvent($"Attempting to connect to {ConnectionManager.RemoteIPAddress}");
+            LocalMessageEvent($"Attempting to connect to {ConnectionManager.IPAddress}");
             await Task.Delay(1000);
 
-            ConnectionManager.TcpClient = new TcpClient(ConnectionManager.RemoteIPAddress.ToString(), ConnectionManager.Port);
+            ConnectionManager.TcpClient = new TcpClient(ConnectionManager.IPAddress.ToString(), ConnectionManager.Port);
 
             await using NetworkStream stream = ConnectionManager.TcpClient.GetStream();
 
-            LocalMessageEvent($"Connected to {ConnectionManager.RemoteIPAddress}");
+            LocalMessageEvent($"Connected to {ConnectionManager.IPAddress}");
 
             Packet packet = new Packet();
             packet.ContentType = Packet.MessageType.Broadcast;
@@ -247,6 +264,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             _remoteWindow = new();
             _remoteWindow.ShowDialog();
+            LocalMessageEvent("Connection closed.");
         }
 
     }

@@ -3,6 +3,7 @@ using PROG280__Remote_Access_App_Client__;
 using PROG280__Remote_Access_App_Data__;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -35,21 +36,29 @@ namespace PROG2800__Remote_Access_App_Client__
             Task.Run(HandlePackets);
         }
 
-        private async Task HandlePackets()
+        private void HandlePackets()
         {
-            NetworkStream stream = ServerWindow.ConnectionManager.TcpClient!.GetStream();
-            while (ServerWindow.ConnectionManager.IsConnected)
+            try
             {
-                byte[] buffer = new byte[4096];
-                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
-
-                if(packet != null)
+                NetworkStream stream = ServerWindow.ConnectionManager.TcpClient!.GetStream();
+                while (ServerWindow.ConnectionManager.IsConnected)
                 {
-                    OnReceivePackets(packet);
+                    byte[] buffer = new byte[4096];
+                    int bytesRead = Task.Run(async () => await stream.ReadAsync(buffer, 0, buffer.Length)).Result;
+                    var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
+
+                    if (packet != null)
+                    {
+                        OnReceivePackets(packet);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+
+            }
+            
         }
 
         private void RemoteWindow_OnReceivePackets(Packet packet)
@@ -61,7 +70,7 @@ namespace PROG2800__Remote_Access_App_Client__
                     break;
 
                 case Packet.MessageType.Frame:
-                    _RemoteWindowDataContext.Frame = JsonConvert.DeserializeObject<Image>(packet.Payload);
+                    _RemoteWindowDataContext.Frame = JsonConvert.DeserializeObject<Bitmap>(packet.Payload);
                     break;
             }
         }
