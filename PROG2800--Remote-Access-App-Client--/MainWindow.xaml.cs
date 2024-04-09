@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Net.Http;
 using System.Xml.Serialization;
+using PROG280__Remote_Access_App_Client__;
 
 namespace PROG280__Remote_Access_App_Client__
 {
@@ -23,7 +24,9 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly ConnectionManager _connectionManager = new();
+        public static ConnectionManager ConnectionManager = new();
+
+        private LogsWindow _logWindow;
 
         //public async void Connect(long ipAddress)
         //{
@@ -37,29 +40,25 @@ namespace PROG280__Remote_Access_App_Client__
         //    await stream.WriteAsync(buffer);
         //}
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         public delegate void LocalMessageDelegate(string message);
         public event LocalMessageDelegate LocalMessageEvent;
+
+        private bool _attemptingConnection = false;
 
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = _connectionManager;
-            LocalMessageEvent += _connectionManager!.AddToMessagesList;
+            DataContext = ConnectionManager;
+            LocalMessageEvent += ConnectionManager!.AddToMessagesList;
             LocalMessageEvent += ServerStatusUpdate;
+            _logWindow = new(ConnectionManager);
         }
 
         ~MainWindow()
         {
-            _connectionManager.TcpListener!.Stop();
-            _connectionManager.TcpListener.Dispose();
-            _connectionManager.TcpClient!.Dispose();
+            ConnectionManager.TcpListener!.Stop();
+            ConnectionManager.TcpListener.Dispose();
+            ConnectionManager.TcpClient!.Dispose();
         }
 
         private void ServerStatusUpdate(string message)
@@ -81,33 +80,46 @@ namespace PROG280__Remote_Access_App_Client__
             LocalMessageEvent("Stopping server...");
             ChangeServerButtons();
             await Task.Delay(1000);
+            _attemptingConnection = false;
         }
 
         private void btnLogs_Click(object sender, RoutedEventArgs e)
         {
-
+            _logWindow.Show();
         }
 
         private void StartServer()
         {
             LocalMessageEvent("Starting server...");
-            _connectionManager.TcpListener = new(IPAddress.Any, _connectionManager.Port);
-            _connectionManager.TcpListener.Start();
+            ConnectionManager.TcpListener = new(IPAddress.Any, ConnectionManager.Port);
+            ConnectionManager.TcpListener.Start();
             LocalMessageEvent("Server started!");
         }
 
-        private void ChangeServerButtons()
+        private async void ChangeServerButtons()
         {
             switch (btnStartServer.Content)
             {
                 case "Stop the Server":
                     try
                     {
-                        _connectionManager.TcpListener!.Stop();
+                        ConnectionManager.TcpListener!.Stop();
 
-                        if (_connectionManager.TcpClient != null)
-                            _connectionManager.TcpClient!.Close();
+                        var listenerClose = Task.Run(async () =>
+                        {
+                            while (_attemptingConnection == true)
+                            {
+                                await Task.Delay(1000);
+                            }
+                            return;
+                        });
 
+                        await Task.WhenAll(listenerClose);
+
+                        if (ConnectionManager.TcpClient != null)
+                            ConnectionManager.TcpClient!.Close();
+
+                        await Task.Delay(2000);
                         LocalMessageEvent("Server stopped.");
                         btnStartServer.Click -= Stop_Click;
                         btnStartServer.Click += btnStartServer_Click;
@@ -115,6 +127,9 @@ namespace PROG280__Remote_Access_App_Client__
                         btnRequestConnection.IsEnabled = true;
                         txtServerIp.IsEnabled = true;
                         txtPort.IsEnabled = true;
+
+                        await Task.Delay(1000);
+                        LocalMessageEvent("Waiting for Action...");
                     }
                     catch (Exception ex)
                     {
@@ -173,7 +188,7 @@ namespace PROG280__Remote_Access_App_Client__
                 StartServer();
                 await Task.Delay(1000);
 
-                LocalMessageEvent($"Listening on port {_connectionManager.Port}.");
+                LocalMessageEvent($"Listening on port {ConnectionManager.Port}.");
                 await Task.Delay(1000);
 
                 ChangeServerButtons();
@@ -187,16 +202,14 @@ namespace PROG280__Remote_Access_App_Client__
                 }
                 await Task.Delay(1000);
 
-                while (!_connectionManager.IsConnected)
-                {
-                    LocalMessageEvent("Listening...");
-                    _connectionManager.TcpClient = await _connectionManager.TcpListener!.AcceptTcpClientAsync();
-                    LocalMessageEvent($"Connection Established with {_connectionManager.TcpClient.Client.RemoteEndPoint}.");
-                }
+                LocalMessageEvent("Listening...");
+                ConnectionManager.TcpClient = await ConnectionManager.TcpListener!.AcceptTcpClientAsync();
+                LocalMessageEvent($"Connection Established with {ConnectionManager.TcpClient.Client.RemoteEndPoint}.");
             }
             catch (Exception ex)
             {
-                LocalMessageEvent($"Server failed with error: {ex.Message}");
+                await Task.Delay(1000); //This will run at the same time as clicking stop
+                LocalMessageEvent($"TCP Listener Closed.");
             }
         }
 
