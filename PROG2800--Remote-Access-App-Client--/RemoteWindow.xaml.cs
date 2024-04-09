@@ -78,11 +78,11 @@ namespace PROG2800__Remote_Access_App_Client__
 
                     if (frameChunks.Count == 0)
                     {
-                        totalChunks = int.Parse(packet.Payload);
+                        totalChunks = JsonConvert.DeserializeObject<int>(packet.Payload);
                     }
                     else
                     {
-                        frameChunks.AddRange(Convert.FromBase64String(packet.Payload));
+                        frameChunks.AddRange(JsonConvert.DeserializeObject<byte[]>(packet.Payload));
                         receivedChunks++;
 
                         if (receivedChunks == totalChunks)

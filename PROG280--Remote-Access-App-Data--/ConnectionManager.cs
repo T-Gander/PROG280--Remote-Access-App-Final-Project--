@@ -188,7 +188,7 @@ namespace PROG280__Remote_Access_App_Data__
                         Packet firstPacket = new Packet()
                         {
                             ContentType = MessageType.Frame,
-                            Payload = Convert.ToBase64String(BitConverter.GetBytes(totalChunks))
+                            Payload = JsonConvert.SerializeObject(totalChunks)
                         };
 
                         for(int i = 0; i < totalChunks; i++)
