@@ -192,6 +192,8 @@ namespace PROG280__Remote_Access_App_Data__
                         };
 
                         byte[] initialpacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(firstPacket));
+                        NetworkStream ackstream = TcpClient!.GetStream();
+                        await ackstream.WriteAsync(initialpacket, 0, initialpacket.Length);
 
 
                         for (int i = 0; i < totalChunks - 1; i++)
