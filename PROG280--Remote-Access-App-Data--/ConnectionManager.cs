@@ -202,11 +202,11 @@ namespace PROG280__Remote_Access_App_Data__
                             while (true)
                             {
                                 byte[] buffer = new byte[1024];
-                                int bytesRead = await newstream.ReadAsync(new byte[chunkSize], 0, chunkSize);
+                                int bytesRead = await newstream.ReadAsync(buffer, 0, buffer.Length);
                                 var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                                 var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
 
-                                if(packet.ContentType == MessageType.Acknowledgement)
+                                if(packet != null && packet.ContentType == MessageType.Acknowledgement)
                                 {
                                     break;
                                 }
