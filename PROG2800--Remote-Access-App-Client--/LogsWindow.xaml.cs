@@ -21,12 +21,10 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class LogsWindow : Window
     {
-        private ConnectionManager _connectionManager { get; set; }
-        public LogsWindow(ConnectionManager ConnectionManager)
+        public LogsWindow()
         {
             InitializeComponent();
-            _connectionManager = ConnectionManager;
-            DataContext = _connectionManager;
+            DataContext = ServerWindow.ConnectionManager;
         }
 
         protected override void OnClosing(CancelEventArgs e)

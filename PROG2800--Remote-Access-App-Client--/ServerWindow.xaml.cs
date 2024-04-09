@@ -16,17 +16,21 @@ using System.Runtime.CompilerServices;
 using System.Net.Http;
 using System.Xml.Serialization;
 using PROG280__Remote_Access_App_Client__;
+using Newtonsoft.Json;
+using PROG2800__Remote_Access_App_Client__;
 
 namespace PROG280__Remote_Access_App_Client__
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class ServerWindow : Window
     {
         public static ConnectionManager ConnectionManager = new();
 
         private LogsWindow _logWindow;
+
+        private RemoteWindow? _remoteWindow;
 
         //public async void Connect(long ipAddress)
         //{
@@ -41,20 +45,21 @@ namespace PROG280__Remote_Access_App_Client__
         //}
 
         public delegate void LocalMessageDelegate(string message);
+        public delegate void PacketDelegate(Packet packet);
         public event LocalMessageDelegate LocalMessageEvent;
 
         private bool _attemptingConnection = false;
 
-        public MainWindow()
+        public ServerWindow()
         {
             InitializeComponent();
             DataContext = ConnectionManager;
             LocalMessageEvent += ConnectionManager!.AddToMessagesList;
             LocalMessageEvent += ServerStatusUpdate;
-            _logWindow = new(ConnectionManager);
+            _logWindow = new();
         }
 
-        ~MainWindow()
+        ~ServerWindow()
         {
             ConnectionManager.TcpListener!.Stop();
             ConnectionManager.TcpListener.Dispose();
@@ -75,12 +80,17 @@ namespace PROG280__Remote_Access_App_Client__
             lblAppStatus.Text = message;
         }
 
-        private async void Stop_Click(object sender, RoutedEventArgs e)
+        private async Task StopServer()
         {
             LocalMessageEvent("Stopping server...");
-            ChangeServerButtons();
+            ChangeServerState();
             await Task.Delay(1000);
             _attemptingConnection = false;
+        }
+
+        private async void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            await StopServer();
         }
 
         private void btnLogs_Click(object sender, RoutedEventArgs e)
@@ -96,7 +106,7 @@ namespace PROG280__Remote_Access_App_Client__
             LocalMessageEvent("Server started!");
         }
 
-        private async void ChangeServerButtons()
+        private async void ChangeServerState()
         {
             switch (btnStartServer.Content)
             {
@@ -121,6 +131,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                         await Task.Delay(2000);
                         LocalMessageEvent("Server stopped.");
+                        ConnectionManager.IsConnected = false;
                         btnStartServer.Click -= Stop_Click;
                         btnStartServer.Click += btnStartServer_Click;
                         btnStartServer.Content = "Start a Server";
@@ -191,7 +202,7 @@ namespace PROG280__Remote_Access_App_Client__
                 LocalMessageEvent($"Listening on port {ConnectionManager.Port}.");
                 await Task.Delay(1000);
 
-                ChangeServerButtons();
+                ChangeServerState();
 
                 LocalMessageEvent("Retreiving external IP...");
                 await Task.Delay(1000);
@@ -205,6 +216,7 @@ namespace PROG280__Remote_Access_App_Client__
                 LocalMessageEvent("Listening...");
                 ConnectionManager.TcpClient = await ConnectionManager.TcpListener!.AcceptTcpClientAsync();
                 LocalMessageEvent($"Connection Established with {ConnectionManager.TcpClient.Client.RemoteEndPoint}.");
+                ConnectionManager.IsConnected = true;
             }
             catch (Exception ex)
             {
@@ -213,9 +225,29 @@ namespace PROG280__Remote_Access_App_Client__
             }
         }
 
-        private void btnRequestConnection_Click(object sender, RoutedEventArgs e)
+        private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
+            LocalMessageEvent($"Attempting to connect to {ConnectionManager.RemoteIPAddress}");
+            await Task.Delay(1000);
 
+            ConnectionManager.TcpClient = new TcpClient(ConnectionManager.RemoteIPAddress.ToString(), ConnectionManager.Port);
+
+            await using NetworkStream stream = ConnectionManager.TcpClient.GetStream();
+
+            LocalMessageEvent($"Connected to {ConnectionManager.RemoteIPAddress}");
+
+            Packet packet = new Packet();
+            packet.ContentType = Packet.MessageType.Broadcast;
+            packet.Payload = "Test";
+
+            var tmp = JsonConvert.SerializeObject(packet);
+            byte[] buffer = Encoding.UTF8.GetBytes(tmp);
+
+            await stream.WriteAsync(buffer, 0, buffer.Length);
+
+            _remoteWindow = new();
+            _remoteWindow.ShowDialog();
         }
+
     }
 }
