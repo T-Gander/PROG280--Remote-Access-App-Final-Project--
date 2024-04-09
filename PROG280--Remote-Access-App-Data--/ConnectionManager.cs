@@ -195,11 +195,26 @@ namespace PROG280__Remote_Access_App_Data__
                         NetworkStream ackstream = TcpClient!.GetStream();
                         await ackstream.WriteAsync(initialpacket, 0, initialpacket.Length);
 
+                        NetworkStream newstream = TcpClient!.GetStream();
 
                         for (int i = 0; i < totalChunks - 1; i++)
                         {
-                            NetworkStream newstream = TcpClient!.GetStream();
-                            await newstream.ReadAsync(new byte[chunkSize], 0, chunkSize);
+                            while (true)
+                            {
+                                byte[] buffer = new byte[1024];
+                                int bytesRead = await newstream.ReadAsync(new byte[chunkSize], 0, chunkSize);
+                                var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                                var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
+
+                                if(packet.ContentType == MessageType.Acknowledgement)
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    await Task.Delay(4);
+                                }
+                            }
 
                             Packet screenPacket = new();
                             screenPacket.ContentType = MessageType.Frame;
