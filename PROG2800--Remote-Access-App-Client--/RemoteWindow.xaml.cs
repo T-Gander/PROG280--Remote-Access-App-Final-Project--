@@ -80,6 +80,7 @@ namespace PROG2800__Remote_Access_App_Client__
                     {
                         totalChunks = JsonConvert.DeserializeObject<int>(packet.Payload);
                         //Send Acknowledgement
+                        await ServerWindow.ConnectionManager.Send();
                         receivedChunks++;
                     }
                     else
