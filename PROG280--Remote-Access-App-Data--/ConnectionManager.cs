@@ -126,44 +126,44 @@ namespace PROG280__Remote_Access_App_Data__
             }
         }
 
-        public Task<Packet> Receive()
-        {
-            switch (_isServer)
-            {
-                case true:
-                    return ServerReceive();
+        //public Task<Packet> Receive()
+        //{
+        //    switch (_isServer)
+        //    {
+        //        case true:
+        //            return ServerReceive();
 
-                case false:
-                    return ClientReceive();
-            }
-        }
+        //        case false:
+        //            return ClientReceive();
+        //    }
+        //}
 
-        private async Task<Packet?> ServerReceive()
-        {
-            NetworkStream stream = TcpClient!.GetStream();
-            while (IsConnected)
-            {
-                byte[] buffer = new byte[4096];
-                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
-                if (packet != null)
-                    return packet;
-            }
-            return null;
-        }
+        //private async Task<Packet?> ServerReceive()
+        //{
+        //    NetworkStream stream = TcpClient!.GetStream();
+        //    while (IsConnected)
+        //    {
+        //        byte[] buffer = new byte[4096];
+        //        int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+        //        var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+        //        var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
+        //        if (packet != null)
+        //            return packet;
+        //    }
+        //    return null;
+        //}
 
-        public async Task ServerSend(Packet packet)
-        {
-            NetworkStream stream = TcpClient!.GetStream();
-            while (IsConnected)
-            {
-                byte[] buffer = new byte[4096];
-                var sendpacket = JsonConvert.SerializeObject(packet);
-                var packetbytes = Encoding.UTF8.GetBytes(sendpacket);
-                await stream.WriteAsync(packetbytes, 0, buffer.Length);
-            }
-        }
+        //public async Task ServerSend(Packet packet)
+        //{
+        //    NetworkStream stream = TcpClient!.GetStream();
+        //    while (IsConnected)
+        //    {
+        //        byte[] buffer = new byte[4096];
+        //        var sendpacket = JsonConvert.SerializeObject(packet);
+        //        var packetbytes = Encoding.UTF8.GetBytes(sendpacket);
+        //        await stream.WriteAsync(packetbytes, 0, buffer.Length);
+        //    }
+        //}
 
         public async Task Send()
         {
@@ -193,10 +193,13 @@ namespace PROG280__Remote_Access_App_Data__
 
                         byte[] initialpacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(firstPacket));
 
-                        await TcpClient.GetStream().WriteAsync(initialpacket, 0, initialpacket.Length);
-
-                        for (int i = 0; i < totalChunks; i++)
+                        NetworkStream stream = TcpClient!.GetStream();
+                        int bytesRead = Task.Run(async () => await stream.ReadAsync(new byte[1024], 0, 1024)).Result;
+                        
+                        for (int i = 0; i < totalChunks - 1; i++)
                         {
+                            await stream.ReadAsync(new byte[chunkSize]);
+
                             Packet screenPacket = new();
                             screenPacket.ContentType = MessageType.Frame;
 
@@ -217,8 +220,24 @@ namespace PROG280__Remote_Access_App_Data__
                     break;
 
                 case false:
+
+                    await SendAcknowledgementPacket();
                     break;
             }
+        }
+
+        private async Task SendAcknowledgementPacket()
+        {
+            NetworkStream stream = TcpClient!.GetStream();
+
+            Packet ack = new Packet()
+            {
+                ContentType = MessageType.Acknowledgement
+            };
+
+            byte[] packetbytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ack)); ;
+
+            await stream.WriteAsync(packetbytes, 0, packetbytes.Length);
         }
         
         public Bitmap GrabScreen()
@@ -232,9 +251,9 @@ namespace PROG280__Remote_Access_App_Data__
             return screenshot;
         }
 
-        private async Task<Packet> ClientReceive()
-        {
-            return Receive().Result;
-        }
+        //private async Task<Packet> ClientReceive()
+        //{
+        //    return Receive().Result;
+        //}
     }
 }

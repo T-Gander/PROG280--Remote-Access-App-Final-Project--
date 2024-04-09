@@ -44,7 +44,7 @@ namespace PROG2800__Remote_Access_App_Client__
                 NetworkStream stream = ServerWindow.ConnectionManager.TcpClient!.GetStream();
                 while (ServerWindow.ConnectionManager.IsConnected)
                 {
-                    byte[] buffer = new byte[4096];
+                    byte[] buffer = new byte[1024];
                     int bytesRead = Task.Run(async () => await stream.ReadAsync(buffer, 0, buffer.Length)).Result;
                     var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
@@ -66,7 +66,7 @@ namespace PROG2800__Remote_Access_App_Client__
         private int totalChunks;
         private int receivedChunks;
 
-        private void RemoteWindow_OnReceivePackets(Packet packet)
+        private async void RemoteWindow_OnReceivePackets(Packet packet)
         {
             switch (packet.ContentType)
             {
@@ -79,11 +79,14 @@ namespace PROG2800__Remote_Access_App_Client__
                     if (receivedChunks == 0)
                     {
                         totalChunks = JsonConvert.DeserializeObject<int>(packet.Payload);
+                        //Send Acknowledgement
                         receivedChunks++;
                     }
                     else
                     {
                         frameChunks.AddRange(JsonConvert.DeserializeObject<byte[]>(packet.Payload));
+                        //Send Acknowledgement
+                        await ServerWindow.ConnectionManager.Send();
                         receivedChunks++;
 
                         if (receivedChunks == totalChunks)
