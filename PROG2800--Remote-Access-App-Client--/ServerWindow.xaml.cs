@@ -32,18 +32,6 @@ namespace PROG280__Remote_Access_App_Client__
 
         private RemoteWindow? _remoteWindow;
 
-        //public async void Connect(long ipAddress)
-        //{
-        //    var ipEndPoint = new IPEndPoint(ipAddress, 13);
-
-        //    using TcpClient client = new();
-        //    await client.ConnectAsync(ipEndPoint);
-        //    await using NetworkStream stream = client.GetStream();
-
-        //    var buffer = new byte[1_024];
-        //    await stream.WriteAsync(buffer);
-        //}
-
         public delegate void LocalMessageDelegate(string message);
         public delegate void PacketDelegate(Packet packet);
         public event LocalMessageDelegate LocalMessageEvent;
@@ -257,19 +245,9 @@ namespace PROG280__Remote_Access_App_Client__
 
             LocalMessageEvent($"Connected to {ConnectionManager.IPAddress}");
 
-            Packet packet = new Packet();
-            packet.ContentType = Packet.MessageType.Broadcast;
-            packet.Payload = "Test";
-
-            var tmp = JsonConvert.SerializeObject(packet);
-            byte[] buffer = Encoding.UTF8.GetBytes(tmp);
-
-            await stream.WriteAsync(buffer, 0, buffer.Length);
-
             _remoteWindow = new();
             _remoteWindow.ShowDialog();
             LocalMessageEvent("Connection closed.");
         }
-
     }
 }
