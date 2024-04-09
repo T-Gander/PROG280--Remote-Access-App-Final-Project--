@@ -76,7 +76,7 @@ namespace PROG2800__Remote_Access_App_Client__
 
                 case Packet.MessageType.Frame:
 
-                    if (frameChunks.Count == 0)
+                    if (receivedChunks == 0)
                     {
                         totalChunks = JsonConvert.DeserializeObject<int>(packet.Payload);
                         receivedChunks++;
