@@ -213,10 +213,5 @@ namespace PROG280__Remote_Access_App_Data__
 
             return screenshot;
         }
-
-        //private async Task<Packet> ClientReceive()
-        //{
-        //    return Receive().Result;
-        //}
     }
 }
