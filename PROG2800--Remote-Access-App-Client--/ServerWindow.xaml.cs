@@ -203,6 +203,8 @@ namespace PROG280__Remote_Access_App_Client__
 
                 await Listen();
 
+                int count = 0;
+
                 while(true)
                 {
                     if (!ConnectionManager.IsConnected)
@@ -211,6 +213,7 @@ namespace PROG280__Remote_Access_App_Client__
                     }
                     else
                     {
+                        count++;
                         await ConnectionManager.Send();
                     }
                     await Task.Delay(1000);

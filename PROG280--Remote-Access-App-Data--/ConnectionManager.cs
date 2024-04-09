@@ -178,6 +178,8 @@ namespace PROG280__Remote_Access_App_Data__
                             byte[] bytepacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(screenPacket));
                             await TcpClient.GetStream().WriteAsync(bytepacket, 0, bytepacket.Length);
                         }
+
+                        await TcpClient!.GetStream().FlushAsync();
                     }
                     screen.Dispose();
                     break;
