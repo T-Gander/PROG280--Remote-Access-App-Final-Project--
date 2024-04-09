@@ -173,26 +173,44 @@ namespace PROG280__Remote_Access_App_Data__
                     //Method to grab screen
                     //Create packet
                     //Send packet to client.
-                    byte[] bitmapBytes
+                    byte[] bitmapBytes;
 
                     Bitmap screen = GrabScreen();
+
                     using (MemoryStream mstream = new())
                     {
                         screen.Save(mstream, ImageFormat.Png);
                         bitmapBytes = mstream.ToArray();
+
+                        int chunkSize = 1024;
+                        int totalChunks = (int)Math.Ceiling((double)bitmapBytes.Length / chunkSize) + 1;    //+ 1 is for the initial chunk size packet.
+
+                        Packet firstPacket = new Packet()
+                        {
+                            ContentType = MessageType.Frame,
+                            Payload = Convert.ToBase64String(BitConverter.GetBytes(totalChunks))
+                        };
+
+                        for(int i = 0; i < totalChunks; i++)
+                        {
+                            Packet screenPacket = new();
+                            screenPacket.ContentType = MessageType.Frame;
+
+                            // Determine chunk boundaries
+                            int offset = i * chunkSize;
+                            int length = Math.Min(chunkSize, bitmapBytes.Length - offset);
+                            byte[] chunk = new byte[length];
+                            Buffer.BlockCopy(bitmapBytes, offset, chunk, 0, length);
+
+                            // Set payload as base64 string of chunk
+                            screenPacket.Payload = Convert.ToBase64String(chunk);
+
+                            // Serialize packet and send
+                            byte[] bytepacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(screenPacket));
+                            await TcpClient.GetStream().WriteAsync(bytepacket, 0, bytepacket.Length);
+                        }
                     }
-                        
-                    Packet screenPacket = new();
-                    screenPacket.ContentType = MessageType.Frame;
-                    screenPacket.Payload = JsonConvert.SerializeObject(bitmapBytes);
-
-                    byte[] bytepacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(screenPacket));
-
-                    NetworkStream stream = TcpClient!.GetStream();
-                    await stream.WriteAsync(bytepacket, 0, bytepacket.Length);
-
                     screen.Dispose();
-                    
                     break;
 
                 case false:

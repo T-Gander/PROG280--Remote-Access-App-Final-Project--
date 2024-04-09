@@ -62,25 +62,53 @@ namespace PROG2800__Remote_Access_App_Client__
             
         }
 
+        private List<byte> frameChunks = new List<byte>();
+        private int totalChunks;
+        private int receivedChunks;
+
         private void RemoteWindow_OnReceivePackets(Packet packet)
         {
-            switch(packet.ContentType)
+            switch (packet.ContentType)
             {
                 case Packet.MessageType.Broadcast:
                     _RemoteWindowDataContext.Messages.Add(JsonConvert.DeserializeObject<string>(packet.Payload));
                     break;
 
                 case Packet.MessageType.Frame:
-                    Bitmap deserializedPayload;
 
-                    using(MemoryStream mstream = new(JsonConvert.DeserializeObject<byte[]>(packet.Payload)))
+                    if (frameChunks.Count == 0)
                     {
-                        deserializedPayload = new Bitmap(mstream);
+                        totalChunks = int.Parse(packet.Payload);
                     }
+                    else
+                    {
+                        frameChunks.AddRange(Convert.FromBase64String(packet.Payload));
+                        receivedChunks++;
 
-                    _RemoteWindowDataContext.Frame = deserializedPayload;
+                        if (receivedChunks == totalChunks)
+                        {
+                            byte[] bitmapBytes = frameChunks.ToArray();
+
+                            Bitmap deserializedPayload;
+
+                            using (MemoryStream mstream = new(bitmapBytes))
+                            {
+                                deserializedPayload = new Bitmap(mstream);
+                            }
+
+                            _RemoteWindowDataContext.Frame = deserializedPayload;
+
+                            frameChunks.Clear();
+                            totalChunks = 0;
+                            receivedChunks = 0;
+                        }
+                    }
+                    break;
+
+                default:
                     break;
             }
+            
         }
     }
 }
