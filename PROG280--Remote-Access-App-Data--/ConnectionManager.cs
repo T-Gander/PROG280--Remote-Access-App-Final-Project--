@@ -26,11 +26,11 @@ namespace PROG280__Remote_Access_App_Data__
 
         public bool IsServer { get; set; } = false;
 
-        private NetworkStream _videoStream { get; set; } = TcpVideoClient!.GetStream();
+        private NetworkStream? _videoStream { get; set; } = TcpVideoClient!.GetStream();
 
-        public string LocalIPAddress { get; set; }
+        public string LocalIPAddress { get; set; } = string.Empty;
 
-        public string RemoteIPAddress { get; set; }
+        public string RemoteIPAddress { get; set; } = string.Empty;
 
         public static TcpListener? TcpListener { get; set; }
         public static TcpClient? TcpVideoClient { get; set; }
