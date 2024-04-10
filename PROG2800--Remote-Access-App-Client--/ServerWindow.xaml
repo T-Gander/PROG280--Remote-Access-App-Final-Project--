@@ -32,7 +32,9 @@
         </Grid.RowDefinitions>
 
         <Label Grid.Column="1" VerticalAlignment="Center">Server IP:</Label>
-        <TextBox x:Name="txtServerIp" Grid.Column="2" Grid.ColumnSpan="2" Height="30" VerticalContentAlignment="Center" Text="{Binding Path=IPAddress}"></TextBox>
+        <TextBox x:Name="txtServerIp" Grid.Column="2" Grid.ColumnSpan="2" Height="30" VerticalContentAlignment="Center" Text="{Binding Path=RemoteIPAddress}"></TextBox>
+        <Label Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">Local IP:</Label>
+        <Label Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Center" Content="{Binding Path=LocalIPAddress}"></Label>
         <Label VerticalAlignment="Center" Grid.Column="4">Port:</Label>
         <TextBox x:Name="txtPort" Grid.Column="5" Height="30" VerticalContentAlignment="Center" Text="{Binding Path=Port}"></TextBox>
         <Button Grid.Column="7" x:Name="btnRequestConnection" Click="btnRequestConnection_Click" Height="30" Grid.ColumnSpan="2">Request Connection</Button>

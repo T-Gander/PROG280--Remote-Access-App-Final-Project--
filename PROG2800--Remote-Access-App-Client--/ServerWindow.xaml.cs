@@ -44,6 +44,7 @@ namespace PROG280__Remote_Access_App_Client__
             DataContext = ConnectionManager;
             LocalMessageEvent += ConnectionManager!.AddToMessagesList;
             LocalMessageEvent += ServerStatusUpdate;
+            ConnectionManager.LocalIPAddress = RetreiveLocalIP();
             _logWindow = new();
         }
 
@@ -51,7 +52,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             ConnectionManager.TcpListener!.Stop();
             ConnectionManager.TcpListener.Dispose();
-            ConnectionManager.TcpClient!.Dispose();
+            ConnectionManager.TcpVideoClient!.Dispose();
         }
 
         private void ServerStatusUpdate(string message)
@@ -88,7 +89,12 @@ namespace PROG280__Remote_Access_App_Client__
 
         private void StartServer()
         {
+            btnRequestConnection.IsEnabled = false;
+            txtServerIp.IsEnabled = false;
+            txtPort.IsEnabled = false;
+
             LocalMessageEvent("Starting server...");
+            Task.Delay(1000);
             ConnectionManager.TcpListener = new(IPAddress.Any, ConnectionManager.Port);
             ConnectionManager.TcpListener.Start();
             LocalMessageEvent("Server started!");
@@ -101,28 +107,20 @@ namespace PROG280__Remote_Access_App_Client__
                 case "Stop the Server":
                     try
                     {
+                        if (ConnectionManager.TcpVideoClient != null)
+                            ConnectionManager.TcpVideoClient!.Close();
+
                         ConnectionManager.TcpListener!.Stop();
 
-                        var listenerClose = Task.Run(async () =>
-                        {
-                            while (_attemptingConnection == true)
-                            {
-                                await Task.Delay(1000);
-                            }
-                            return;
-                        });
-
-                        await Task.WhenAll(listenerClose);
-
-                        if (ConnectionManager.TcpClient != null)
-                            ConnectionManager.TcpClient!.Close();
-
-                        await Task.Delay(2000);
+                        await Task.Delay(1000);
                         LocalMessageEvent("Server stopped.");
+
                         ConnectionManager.IsConnected = false;
+
                         btnStartServer.Click -= Stop_Click;
                         btnStartServer.Click += btnStartServer_Click;
                         btnStartServer.Content = "Start a Server";
+
                         btnRequestConnection.IsEnabled = true;
                         txtServerIp.IsEnabled = true;
                         txtPort.IsEnabled = true;
@@ -137,6 +135,8 @@ namespace PROG280__Remote_Access_App_Client__
                     break;
 
                 case "Start a Server":
+                    ConnectionManager.IsServer = true;
+
                     btnStartServer.Click -= btnStartServer_Click;
                     btnStartServer.Click += Stop_Click;
                     btnStartServer.Content = "Stop the Server";
@@ -180,32 +180,71 @@ namespace PROG280__Remote_Access_App_Client__
             }
         }
 
+        private string RetreiveLocalIP()
+        {
+            try
+            {
+                string hostName = Dns.GetHostName();
+                List<IPAddress> localIPs = Dns.GetHostAddresses(hostName).ToList();
+
+                for (int i = 0; i < localIPs.Count - 1; i++)
+                {
+                    string ipstring = localIPs[i].ToString();
+                    if (ipstring.Contains(":"))
+                    {
+                        localIPs.RemoveAt(i);
+                        i--;
+                    }
+                }
+
+                return localIPs[0].ToString();
+            }
+            catch (Exception ex)
+            {
+                LocalMessageEvent($"{ex.Message}");
+                return "Error, Check Logs.";
+            }
+        }
+
         private async void btnStartServer_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                ChangeServerState();
+
                 StartServer();
                 await Task.Delay(1000);
 
                 LocalMessageEvent($"Listening on port {ConnectionManager.Port}.");
                 await Task.Delay(1000);
 
-                ChangeServerState();
-
                 LocalMessageEvent("Retreiving external IP...");
                 await Task.Delay(1000);
 
                 if (!TryRetreiveIP())
                 {
+                    await StopServer();
                     return;
                 }
                 await Task.Delay(1000);
 
+                await CheckConnection();
+            }
+            catch (Exception ex)
+            {
+                LocalMessageEvent($"Error logged: {ex.Message})");
+                await Task.Delay(1000); //This will run at the same time as clicking stop
+                LocalMessageEvent($"ERROR, Check Logs.");
+            }
+        }
+
+        private async Task CheckConnection()
+        {
+            try
+            {
                 await Listen();
 
-                int count = 0;
-
-                while(true)
+                while (true)
                 {
                     if (!ConnectionManager.IsConnected)
                     {
@@ -213,24 +252,23 @@ namespace PROG280__Remote_Access_App_Client__
                     }
                     else
                     {
-                        count++;
-                        await ConnectionManager.Send();
+                        await ConnectionManager.SendVideoPackets();
                     }
-                    await Task.Delay(1000);
+                    await Task.Delay(1000); //Tied to fps?
                 }
             }
             catch (Exception ex)
             {
-                await Task.Delay(1000); //This will run at the same time as clicking stop
                 LocalMessageEvent($"TCP Listener Closed.");
+                await Task.Delay(1000);
             }
         }
 
         private async Task Listen()
         {
             LocalMessageEvent("Listening...");
-            ConnectionManager.TcpClient = await ConnectionManager.TcpListener!.AcceptTcpClientAsync();
-            LocalMessageEvent($"Connection Established with {ConnectionManager.TcpClient.Client.RemoteEndPoint}.");
+            ConnectionManager.TcpVideoClient = await ConnectionManager.TcpListener!.AcceptTcpClientAsync();
+            LocalMessageEvent($"Connection Established with {ConnectionManager.TcpVideoClient.Client.RemoteEndPoint}.");
             ConnectionManager.IsConnected = true;
 
             await Task.Delay(1000);
@@ -238,15 +276,15 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
-            LocalMessageEvent($"Attempting to connect to {ConnectionManager.IPAddress}");
+            ConnectionManager.IsServer = false;
+            LocalMessageEvent($"Attempting to connect to {ConnectionManager.RemoteIPAddress}");
             await Task.Delay(1000);
 
-            ConnectionManager.TcpClient = new TcpClient(ConnectionManager.IPAddress.ToString(), ConnectionManager.Port);
+            ConnectionManager.TcpVideoClient = new TcpClient(ConnectionManager.RemoteIPAddress.ToString(), ConnectionManager.Port);
 
-            await using NetworkStream stream = ConnectionManager.TcpClient.GetStream();
             ConnectionManager.IsConnected = true;
 
-            LocalMessageEvent($"Connected to {ConnectionManager.IPAddress}");
+            LocalMessageEvent($"Connected to {ConnectionManager.RemoteIPAddress}");
 
             _remoteWindow = new();
             _remoteWindow.ShowDialog();

@@ -3,6 +3,7 @@ using PROG280__Remote_Access_App_Client__;
 using PROG280__Remote_Access_App_Data__;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -25,15 +26,20 @@ namespace PROG2800__Remote_Access_App_Client__
     /// </summary>
     public partial class RemoteWindow : Window
     {
-        private delegate void ReceivePackets(Packet packets);
-        private event ReceivePackets OnReceivePackets;
+        //private delegate void ReceivePackets(Packet packets);
+        //private event ReceivePackets OnReceivePackets;
+
+        private Bitmap? _Frame;
+
+        private ObservableCollection<string> _Messages { get; set; } = new();
 
         private RemoteWindowDataContext _RemoteWindowDataContext = new();
 
         public RemoteWindow()
         {
             InitializeComponent();
-            OnReceivePackets += RemoteWindow_OnReceivePackets;
+            //OnReceivePackets += RemoteWindow_OnReceivePackets;
+            DataContext = this;
             Task.Run(HandlePackets);
         }
 
@@ -41,79 +47,13 @@ namespace PROG2800__Remote_Access_App_Client__
         {
             try
             {
-                NetworkStream stream = ServerWindow.ConnectionManager.TcpClient!.GetStream();
-                while (ServerWindow.ConnectionManager.IsConnected)
-                {
-                    byte[] buffer = new byte[1500];
-                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                    var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
-
-                    if (packet != null)
-                    {
-                        OnReceivePackets(packet);
-                    }
-                }
+                _Frame = await ServerWindow.ConnectionManager.ReceiveVideoPackets();
             }
             catch (Exception ex)
             {
-
+                //Something bad happened
             }
-            
         }
 
-        private List<byte> frameChunks = new List<byte>();
-        private int totalChunks;
-        private int receivedChunks;
-
-        private async void RemoteWindow_OnReceivePackets(Packet packet)
-        {
-            switch (packet.ContentType)
-            {
-                case Packet.MessageType.Broadcast:
-                    _RemoteWindowDataContext.Messages.Add(JsonConvert.DeserializeObject<string>(packet.Payload));
-                    break;
-
-                case Packet.MessageType.Frame:
-
-                    if (receivedChunks == 0)
-                    {
-                        totalChunks = JsonConvert.DeserializeObject<int>(packet.Payload);
-                        //Send Acknowledgement
-                        await ServerWindow.ConnectionManager.Send();
-                        receivedChunks++;
-                    }
-                    else
-                    {
-                        frameChunks.AddRange(JsonConvert.DeserializeObject<byte[]>(packet.Payload));
-                        //Send Acknowledgement
-                        await ServerWindow.ConnectionManager.Send();
-                        receivedChunks++;
-
-                        if (receivedChunks == totalChunks)
-                        {
-                            byte[] bitmapBytes = frameChunks.ToArray();
-
-                            Bitmap deserializedPayload;
-
-                            using (MemoryStream mstream = new(bitmapBytes))
-                            {
-                                deserializedPayload = new Bitmap(mstream);
-                            }
-
-                            _RemoteWindowDataContext.Frame = deserializedPayload;
-
-                            frameChunks.Clear();
-                            totalChunks = 0;
-                            receivedChunks = 0;
-                        }
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-            
-        }
     }
 }

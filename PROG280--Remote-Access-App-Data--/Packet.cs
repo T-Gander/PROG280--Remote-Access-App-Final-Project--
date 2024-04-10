@@ -5,7 +5,7 @@ namespace PROG280__Remote_Access_App_Data__
     {
         public enum MessageType
         {
-            Broadcast, Frame, File, Acknowledgement
+            Broadcast, Frame, File, Acknowledgement, FrameStart, FrameEnd
         }
         
         public MessageType ContentType { get; set; }
