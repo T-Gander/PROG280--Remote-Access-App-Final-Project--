@@ -283,8 +283,12 @@ namespace PROG280__Remote_Access_App_Client__
 
             LocalMessageEvent($"Connected to {ConnectionManager.RemoteIPAddress}");
 
-            _remoteWindow = new();
-            _remoteWindow.ShowDialog();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _remoteWindow = new RemoteWindow();
+                _remoteWindow.ShowDialog();
+            });
+
             LocalMessageEvent("Connection closed.");
         }
     }
