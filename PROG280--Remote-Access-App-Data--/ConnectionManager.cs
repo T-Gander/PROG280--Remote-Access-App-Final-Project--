@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Converters;
+using System.Windows.Media.Imaging;
 using static PROG280__Remote_Access_App_Data__.Packet;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -198,7 +199,7 @@ namespace PROG280__Remote_Access_App_Data__
             await TcpVideoClient!.GetStream().WriteAsync(bytepacket, 0, bytepacket.Length);
         }
 
-        public async Task<Bitmap> ReceiveVideoPackets()
+        public async Task<BitmapImage?> ReceiveVideoPackets()
         {
             if (_videoStream == null)
             {
@@ -242,11 +243,15 @@ namespace PROG280__Remote_Access_App_Data__
 
             byte[] bitmapBytes = frameChunks.ToArray();
 
-            Bitmap frame;
+            BitmapImage? frame;
 
             using (MemoryStream mstream = new(bitmapBytes))
             {
-                frame = new Bitmap(mstream);
+                frame = new BitmapImage();
+                frame.BeginInit();
+                frame.StreamSource = mstream;
+                frame.CacheOption = BitmapCacheOption.OnLoad;
+                frame.EndInit();
             }
             return frame;
         }
