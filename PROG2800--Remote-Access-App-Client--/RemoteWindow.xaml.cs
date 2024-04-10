@@ -29,9 +29,9 @@ namespace PROG2800__Remote_Access_App_Client__
         //private delegate void ReceivePackets(Packet packets);
         //private event ReceivePackets OnReceivePackets;
 
-        private Bitmap? _Frame;
+        //private Bitmap? _Frame;
 
-        private ObservableCollection<string> _Messages { get; set; } = new();
+        //private ObservableCollection<string> _Messages { get; set; } = new();
 
         private RemoteWindowDataContext _RemoteWindowDataContext = new();
 
@@ -39,7 +39,7 @@ namespace PROG2800__Remote_Access_App_Client__
         {
             InitializeComponent();
             //OnReceivePackets += RemoteWindow_OnReceivePackets;
-            DataContext = this;
+            DataContext = _RemoteWindowDataContext;
             Task.Run(HandlePackets);
         }
 
@@ -47,7 +47,7 @@ namespace PROG2800__Remote_Access_App_Client__
         {
             try
             {
-                _Frame = await ServerWindow.ConnectionManager.ReceiveVideoPackets();
+                _RemoteWindowDataContext.Frame = await ServerWindow.ConnectionManager.ReceiveVideoPackets();
             }
             catch (Exception ex)
             {
