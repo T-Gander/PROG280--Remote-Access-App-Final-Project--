@@ -236,7 +236,9 @@ namespace PROG280__Remote_Access_App_Data__
                 {
                     frameChunks.AddRange(JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!);
                     await SendVideoAckPacket();
+                    continue;
                 }
+                break;
             }
 
             if(frameChunks.Count/_chunkSize != expectedChunks)

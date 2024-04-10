@@ -36,8 +36,6 @@ namespace PROG280__Remote_Access_App_Client__
         public delegate void PacketDelegate(Packet packet);
         public event LocalMessageDelegate LocalMessageEvent;
 
-        private bool _attemptingConnection = false;
-
         public ServerWindow()
         {
             InitializeComponent();
@@ -74,7 +72,6 @@ namespace PROG280__Remote_Access_App_Client__
             LocalMessageEvent("Stopping server...");
             ChangeServerState();
             await Task.Delay(1000);
-            _attemptingConnection = false;
         }
 
         private async void Stop_Click(object sender, RoutedEventArgs e)
