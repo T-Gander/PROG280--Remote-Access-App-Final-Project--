@@ -49,6 +49,10 @@ namespace PROG2800__Remote_Access_App_Client__
             {
                 while(true)
                 {
+                    await Dispatcher.Invoke(async () =>
+                    {
+                        _RemoteWindowDataContext.Frame = await ServerWindow.ConnectionManager.ReceiveVideoPackets();
+                    });
                     _RemoteWindowDataContext.Frame = await ServerWindow.ConnectionManager.ReceiveVideoPackets();
                 }
             }
