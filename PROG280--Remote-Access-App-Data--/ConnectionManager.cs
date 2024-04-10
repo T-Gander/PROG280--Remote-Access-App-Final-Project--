@@ -172,6 +172,8 @@ namespace PROG280__Remote_Access_App_Data__
                     }
 
                     await SendFrameEndPacket();
+
+                    await ReceiveVideoAckPacket();
                 }
                 screen.Dispose();
             }
