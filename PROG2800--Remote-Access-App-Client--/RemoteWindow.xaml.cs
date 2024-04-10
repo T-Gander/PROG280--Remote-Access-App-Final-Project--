@@ -53,7 +53,6 @@ namespace PROG2800__Remote_Access_App_Client__
                     {
                         _RemoteWindowDataContext.Frame = await ServerWindow.ConnectionManager.ReceiveVideoPackets();
                     });
-                    _RemoteWindowDataContext.Frame = await ServerWindow.ConnectionManager.ReceiveVideoPackets();
                 }
             }
             catch (Exception ex)
