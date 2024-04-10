@@ -223,6 +223,7 @@ namespace PROG280__Remote_Access_App_Data__
                     {
                         case MessageType.FrameStart:
                             expectedChunks = JsonConvert.DeserializeObject<int>(packet.Payload!);
+                            await SendVideoAckPacket();
                             continue;
 
                         default:
