@@ -28,6 +28,8 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class ServerWindow : INotifyPropertyChanged
     {
+        public enum FrameRate { Thirty = 34, Sixty = 17, OneTwenty = 9 }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
@@ -291,7 +293,7 @@ namespace PROG280__Remote_Access_App_Client__
                     {
                         await ServerConnection!.SendVideoPackets();
                     }
-                    await Task.Delay(1000); //Tied to fps?
+                    await Task.Delay((int)FrameRate.Thirty); //Tied to fps?
                 }
             }
             catch (Exception ex)
