@@ -38,12 +38,22 @@ namespace PROG280__Remote_Access_App_Data__
 
         private async Task<MessageType> ReceiveVideoAckPacket()
         {
-            byte[] buffer = new byte[_packetSize];
-            int bytesRead = await _videoStream.ReadAsync(buffer, 0, buffer.Length);
-            var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
+            try
+            {
+                byte[] buffer = new byte[_packetSize];
+                int bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
+                var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
 
-            return packet!.ContentType;
+                return packet!.ContentType;
+            }
+            catch
+            {
+                Messages.Add("Exception: Didn't receive ack packet. And stream is closed.");
+                IsConnected = false;
+
+                return MessageType.Failure;
+            }
         }
 
         private Bitmap GrabScreen()
@@ -96,7 +106,7 @@ namespace PROG280__Remote_Access_App_Data__
                         //Wait for acknowledgement packet
                         if (await ReceiveVideoAckPacket() != MessageType.Acknowledgement)
                         {
-                            throw new Exception();
+                            return;
                         }
 
                         await SendVideoFrameChunk(chunkIndex, bitmapBytes);
@@ -112,7 +122,6 @@ namespace PROG280__Remote_Access_App_Data__
             }
             catch (Exception ex)
             {
-                IsConnected = false;
                 AddToMessagesList(ex.Message);
             }
         }

@@ -317,7 +317,15 @@ namespace PROG280__Remote_Access_App_Client__
             LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
             await Task.Delay(1000);
 
-            ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, Port);
+            try
+            {
+                ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, Port);
+            }
+            catch
+            {
+                LocalMessageEvent($"Connection Refused.");
+                return;
+            }
 
             ClientConnection!.IsConnected = true;
 
