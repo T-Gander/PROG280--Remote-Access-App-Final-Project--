@@ -46,15 +46,15 @@ namespace PROG280__Remote_Access_App_Client__
                 return RetreiveLocalIP();
             }
         }
-        public string Port
+        public int Port
         {
             get
             {
-                return _port;
+                return int.Parse(_port);
             }
             set
             {
-                if (int.TryParse(value, out int result))
+                if (int.TryParse(value.ToString(), out int result))
                 {
                     _port = result.ToString();
                 }
@@ -67,6 +67,7 @@ namespace PROG280__Remote_Access_App_Client__
         }
 
         private string _port = "9000";
+
         public string RemoteIPAddress
         {
             get
