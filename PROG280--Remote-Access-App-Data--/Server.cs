@@ -116,6 +116,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
             catch (Exception ex)
             {
+                IsConnected = false;
                 AddToMessagesList(ex.Message);
             }
         }
