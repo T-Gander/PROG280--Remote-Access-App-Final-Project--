@@ -20,7 +20,10 @@ namespace PROG280__Remote_Access_App_Data__
 
         protected NetworkStream? _videoStream { get; set; }
 
+        protected NetworkStream? _messageStream { get; set; }
+
         public static ObservableCollection<string> Messages { get; set; } = new();
+
         public static void AddToMessagesList(string message)
         {
             Messages.Add(message);
@@ -28,15 +31,17 @@ namespace PROG280__Remote_Access_App_Data__
 
         public void CloseConnections()
         {
-            _videoStream!.Close();
-            TcpVideoClient!.Close();
-            _videoStream.Dispose();
+            _messageStream?.Close();
+            _messageStream?.Dispose();
+            _videoStream?.Close();
+            TcpVideoClient?.Close();
+            _videoStream?.Dispose();
             TcpVideoClient?.Dispose();
         }
 
         public void ShutDown()
         {
-            TcpListener!.Stop();
+            TcpListener?.Stop();
             TcpListener?.Dispose();
         }
     }

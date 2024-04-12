@@ -1,11 +1,11 @@
-﻿<Window x:Class="PROG2800__Remote_Access_App_Client__.RemoteWindow"
+﻿<Window x:Class="PROG2800__Remote_Access_App_Client__.MessagingWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PROG2800__Remote_Access_App_Client__"
         mc:Ignorable="d"
-        Title="RemoteWindow" Height="800" Width="1200">
+        Title="MessagingWindow" Height="800" Width="600">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -22,12 +22,16 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="10*"/>
+            <RowDefinition Height="8*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Label Grid.Column="2" HorizontalAlignment="Right" Grid.ColumnSpan="4" FontSize="30">You are connected to:</Label>
-        <Label HorizontalAlignment="Left" Grid.Column="6" Grid.ColumnSpan="4" FontSize="30" Content="{Binding Path=RemoteIP}"></Label>
-        <Image Grid.Row="1" Grid.ColumnSpan="12" Grid.RowSpan="2" Source="{Binding Path=Frame}"></Image>
+
+        <ListBox ItemsSource="{Binding Path=Messages}" Grid.ColumnSpan="12"></ListBox>
+
+        <TextBox x:Name="txtMessage"  Grid.Row="1" Grid.ColumnSpan="5" VerticalContentAlignment="Center" Height="50"></TextBox>
+
+        <Button x:Name="btnSendMessage" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="5" FontSize="20" Height="50" VerticalContentAlignment="Center" Click="btnSendMessage_Click">Send</Button>
+        <Button x:Name="btnSendFiles" Grid.Row="1" Grid.Column="7" Grid.ColumnSpan="3" FontSize="20" Height="50" Margin="5" Click="btnSendFiles_Click">Send File...</Button>
+        <Button x:Name="btnRequestControl"  Grid.Row="1" Grid.Column="10" Grid.ColumnSpan="2" FontSize="20" Height="50" Margin="5" Click="btnRequestControl_Click">Control</Button>
     </Grid>
 </Window>
