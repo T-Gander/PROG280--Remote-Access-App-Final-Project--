@@ -283,6 +283,9 @@ namespace PROG280__Remote_Access_App_Client__
                 {
                     if (!ServerConnection!.IsConnected)
                     {
+                        LocalMessageEvent("Lost Connection to Remote Client.");
+                        await Task.Delay(1000);
+                        LocalMessageEvent("Listening...");
                         await Listen();
                     }
                     else

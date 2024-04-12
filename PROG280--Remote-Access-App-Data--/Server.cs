@@ -19,11 +19,7 @@ namespace PROG280__Remote_Access_App_Data__
     {
         private async Task<int> SendFrameStartPacket(byte[] bitmapBytes)
         {
-            if (_videoStream == null)
-            {
-                _videoStream = TcpVideoClient!.GetStream();
-            }
-
+            _videoStream = TcpVideoClient!.GetStream();
 
             int totalChunks = (int)Math.Ceiling((double)bitmapBytes.Length / _chunkSize);
 
