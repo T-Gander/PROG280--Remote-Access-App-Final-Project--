@@ -14,26 +14,6 @@ namespace PROG280__Remote_Access_App_Data__
 
         protected const int _chunkSize = 1024;
         protected const int _packetSize = 1500;
-        protected int _port = 9000;
-
-        public string LocalIPAddress { get; set; } = string.Empty;
-        public string RemoteIPAddress { get; set; } = string.Empty;
-
-        public int Port
-        {
-            get { return _port; }
-            set
-            {
-                if (int.TryParse(value.ToString(), out int parsedValue))
-                {
-                    _port = parsedValue;
-                }
-                else
-                {
-                    _port = 0;
-                };
-            }
-        }
 
         public TcpListener? TcpListener { get; set; }
         public TcpClient? TcpVideoClient { get; set; }
