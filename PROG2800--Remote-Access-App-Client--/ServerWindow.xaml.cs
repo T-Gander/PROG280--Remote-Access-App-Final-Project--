@@ -138,7 +138,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             LocalMessageEvent("Starting server...");
             Task.Delay(1000);
-            ServerConnection.TcpListener = new(IPAddress.Any, ServerConnection.Port);
+            ServerConnection.TcpListener = new(IPAddress.Any, Port);
             ServerConnection.TcpListener.Start();
             LocalMessageEvent("Server started!");
         }
@@ -249,7 +249,7 @@ namespace PROG280__Remote_Access_App_Client__
                 StartServer();
                 await Task.Delay(1000);
 
-                LocalMessageEvent($"Listening on port {ServerConnection!.Port}.");
+                LocalMessageEvent($"Listening on port {Port}.");
                 await Task.Delay(1000);
 
                 LocalMessageEvent("Retreiving external IP...");
@@ -318,7 +318,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             ClientConnection!.IsConnected = true;
 
-            LocalMessageEvent($"Connected to {ClientConnection!.RemoteIPAddress}");
+            LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
             _remoteWindow = new();
             _remoteWindow.ShowDialog();
