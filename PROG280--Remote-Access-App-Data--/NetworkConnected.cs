@@ -21,7 +21,6 @@ namespace PROG280__Remote_Access_App_Data__
         protected NetworkStream? _videoStream { get; set; }
 
         public static ObservableCollection<string> Messages { get; set; } = new();
-
         public static void AddToMessagesList(string message)
         {
             Messages.Add(message);

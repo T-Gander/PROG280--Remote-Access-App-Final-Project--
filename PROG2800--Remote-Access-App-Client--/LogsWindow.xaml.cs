@@ -25,14 +25,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             InitializeComponent();
 
-            if(ServerWindow.ClientConnection != null)
-            {
-                DataContext = ServerWindow.ClientConnection;
-            }
-            else if (ServerWindow.ServerConnection != null)
-            {
-                DataContext = ServerWindow.ServerConnection;
-            }
+            DataContext = NetworkConnected.Messages;
         }
 
         protected override void OnClosing(CancelEventArgs e)
