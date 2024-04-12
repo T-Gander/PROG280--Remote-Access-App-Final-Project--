@@ -55,31 +55,6 @@ namespace PROG2800__Remote_Access_App_Client__
             }
         }
 
-        private async void HandleMessagePackets()
-        {
-
-        }
-
-        //A way of listening for messages for both Client and Server.
-
-        //A way of sending files for the Client.
-
-        //A way to control the server PC.
-
-        private void btnSendMessage_Click(object sender, RoutedEventArgs e)
-        {
-            _RemoteWindowDataContext.Messages.Add(txtMessage.Text);
-            txtMessage.Clear();
-        }
-
-        private void btnSendFiles_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnRequestControl_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+        
     }
 }
