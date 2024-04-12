@@ -321,7 +321,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
-            RemoteWindow _remoteWindow = new();
+            RemoteWindow _remoteWindow = new(RemoteIPAddress);
             _remoteWindow.ShowDialog();
             ClientConnection.CloseConnections();
             LocalMessageEvent("Connection closed.");
