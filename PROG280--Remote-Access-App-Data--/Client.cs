@@ -30,6 +30,11 @@ namespace PROG280__Remote_Access_App_Data__
                 var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
 
+                if(packet == null)
+                {
+                    return null;
+                }
+
                 if (packet!.ContentType != MessageType.Frame)
                 {
                     switch (packet.ContentType)
