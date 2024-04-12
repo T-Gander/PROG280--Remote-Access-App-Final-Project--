@@ -24,7 +24,15 @@ namespace PROG280__Remote_Access_App_Client__
         public LogsWindow()
         {
             InitializeComponent();
-            DataContext = ServerWindow.ConnectionManager;
+
+            if(ServerWindow.ClientConnection != null)
+            {
+                DataContext = ServerWindow.ClientConnection;
+            }
+            else if (ServerWindow.ServerConnection != null)
+            {
+                DataContext = ServerWindow.ServerConnection;
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)

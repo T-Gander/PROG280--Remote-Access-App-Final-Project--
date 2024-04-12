@@ -26,13 +26,6 @@ namespace PROG2800__Remote_Access_App_Client__
     /// </summary>
     public partial class RemoteWindow : Window
     {
-        //private delegate void ReceivePackets(Packet packets);
-        //private event ReceivePackets OnReceivePackets;
-
-        //private Bitmap? _Frame;
-
-        //private ObservableCollection<string> _Messages { get; set; } = new();
-
         private RemoteWindowDataContext _RemoteWindowDataContext = new();
 
         public RemoteWindow()
@@ -51,7 +44,7 @@ namespace PROG2800__Remote_Access_App_Client__
                 {
                     await Dispatcher.Invoke(async () =>
                     {
-                        _RemoteWindowDataContext.Frame = await ServerWindow.ConnectionManager.ReceiveVideoPackets();
+                        _RemoteWindowDataContext.Frame = await ServerWindow.ClientConnection!.ReceiveVideoPackets();
                     });
                 }
             }

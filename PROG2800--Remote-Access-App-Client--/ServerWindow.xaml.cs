@@ -18,19 +18,90 @@ using System.Xml.Serialization;
 using PROG280__Remote_Access_App_Client__;
 using Newtonsoft.Json;
 using PROG2800__Remote_Access_App_Client__;
+using Newtonsoft.Json.Linq;
 
 namespace PROG280__Remote_Access_App_Client__
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class ServerWindow : Window
+    public partial class ServerWindow : INotifyPropertyChanged
     {
-        public static ConnectionManager ConnectionManager = new();
+        public event PropertyChangedEventHandler? PropertyChanged;
 
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public static Client? ClientConnection;
+        public static Server? ServerConnection;
         private LogsWindow _logWindow;
-
         private RemoteWindow? _remoteWindow;
+
+        public string LocalIPAddress {
+            get
+            {
+                return RetreiveLocalIP();
+            }
+        }
+        public string Port 
+        { 
+            get
+            {
+                if (ClientConnection != null)
+                {
+                    return ClientConnection.Port.ToString();
+                }
+                else if (ServerConnection != null)
+                {
+                    return ServerConnection.Port.ToString();
+                }
+                else return "9000";
+            }
+            set
+            {
+                if(int.TryParse(value, out int result))
+                {
+                    if (ClientConnection != null)
+                    {
+                        ClientConnection.Port = result;
+                    }
+                    else if (ServerConnection != null)
+                    {
+                        ServerConnection.Port = result;
+                    }
+                }
+                OnPropertyChanged(nameof(Port));
+            }
+        } 
+        public string RemoteIPAddress 
+        {
+            get
+            {
+                if (ClientConnection != null)
+                {
+                    return ClientConnection.RemoteIPAddress;
+                }
+                else if (ServerConnection != null)
+                {
+                    return ServerConnection.RemoteIPAddress;
+                }
+                else return "";
+            }
+            set
+            {
+                if (ClientConnection != null)
+                {
+                    ClientConnection.RemoteIPAddress = value;
+                }
+                else if (ServerConnection != null)
+                {
+                    ServerConnection.RemoteIPAddress = value;
+                }
+                OnPropertyChanged(nameof(RemoteIPAddress));
+            }
+        }
 
         public delegate void LocalMessageDelegate(string message);
         public delegate void PacketDelegate(Packet packet);
@@ -39,18 +110,10 @@ namespace PROG280__Remote_Access_App_Client__
         public ServerWindow()
         {
             InitializeComponent();
-            DataContext = ConnectionManager;
-            LocalMessageEvent += ConnectionManager!.AddToMessagesList;
+            DataContext = this;
+            LocalMessageEvent += NetworkConnected.AddToMessagesList;
             LocalMessageEvent += ServerStatusUpdate;
-            ConnectionManager.LocalIPAddress = RetreiveLocalIP();
             _logWindow = new();
-        }
-
-        ~ServerWindow()
-        {
-            ConnectionManager.TcpListener!.Stop();
-            ConnectionManager.TcpListener.Dispose();
-            ConnectionManager.TcpVideoClient!.Dispose();
         }
 
         private void ServerStatusUpdate(string message)
@@ -69,6 +132,7 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async Task StopServer()
         {
+            ServerConnection!.ShutDown();
             LocalMessageEvent("Stopping server...");
             ChangeServerState();
             await Task.Delay(1000);
@@ -86,14 +150,16 @@ namespace PROG280__Remote_Access_App_Client__
 
         private void StartServer()
         {
+            ServerConnection = new();
+
             btnRequestConnection.IsEnabled = false;
             txtServerIp.IsEnabled = false;
             txtPort.IsEnabled = false;
 
             LocalMessageEvent("Starting server...");
             Task.Delay(1000);
-            ConnectionManager.TcpListener = new(IPAddress.Any, ConnectionManager.Port);
-            ConnectionManager.TcpListener.Start();
+            ServerConnection.TcpListener = new(IPAddress.Any, ServerConnection.Port);
+            ServerConnection.TcpListener.Start();
             LocalMessageEvent("Server started!");
         }
 
@@ -104,15 +170,8 @@ namespace PROG280__Remote_Access_App_Client__
                 case "Stop the Server":
                     try
                     {
-                        if (ConnectionManager.TcpVideoClient != null)
-                            ConnectionManager.TcpVideoClient!.Close();
-
-                        ConnectionManager.TcpListener!.Stop();
-
                         await Task.Delay(1000);
                         LocalMessageEvent("Server stopped.");
-
-                        ConnectionManager.IsConnected = false;
 
                         btnStartServer.Click -= Stop_Click;
                         btnStartServer.Click += btnStartServer_Click;
@@ -132,8 +191,6 @@ namespace PROG280__Remote_Access_App_Client__
                     break;
 
                 case "Start a Server":
-                    ConnectionManager.IsServer = true;
-
                     btnStartServer.Click -= btnStartServer_Click;
                     btnStartServer.Click += Stop_Click;
                     btnStartServer.Content = "Stop the Server";
@@ -212,7 +269,7 @@ namespace PROG280__Remote_Access_App_Client__
                 StartServer();
                 await Task.Delay(1000);
 
-                LocalMessageEvent($"Listening on port {ConnectionManager.Port}.");
+                LocalMessageEvent($"Listening on port {ServerConnection!.Port}.");
                 await Task.Delay(1000);
 
                 LocalMessageEvent("Retreiving external IP...");
@@ -243,13 +300,13 @@ namespace PROG280__Remote_Access_App_Client__
 
                 while (true)
                 {
-                    if (!ConnectionManager.IsConnected)
+                    if (!ServerConnection!.IsConnected)
                     {
                         await Listen();
                     }
                     else
                     {
-                        await ConnectionManager.SendVideoPackets();
+                        await ServerConnection!.SendVideoPackets();
                     }
                     await Task.Delay(1000); //Tied to fps?
                 }
@@ -264,24 +321,23 @@ namespace PROG280__Remote_Access_App_Client__
         private async Task Listen()
         {
             LocalMessageEvent("Listening...");
-            ConnectionManager.TcpVideoClient = await ConnectionManager.TcpListener!.AcceptTcpClientAsync();
-            LocalMessageEvent($"Connection Established with {ConnectionManager.TcpVideoClient.Client.RemoteEndPoint}.");
-            ConnectionManager.IsConnected = true;
+            ServerConnection!.TcpVideoClient = await ServerConnection!.TcpListener!.AcceptTcpClientAsync();
+            LocalMessageEvent($"Connection Established with {ServerConnection!.TcpVideoClient.Client.RemoteEndPoint}.");
+            ServerConnection!.IsConnected = true;
 
             await Task.Delay(1000);
         }
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
-            ConnectionManager.IsServer = false;
-            LocalMessageEvent($"Attempting to connect to {ConnectionManager.RemoteIPAddress}");
+            LocalMessageEvent($"Attempting to connect to {ClientConnection!.RemoteIPAddress}");
             await Task.Delay(1000);
 
-            ConnectionManager.TcpVideoClient = new TcpClient(ConnectionManager.RemoteIPAddress.ToString(), ConnectionManager.Port);
+            ClientConnection!.TcpVideoClient = new TcpClient(ClientConnection!.RemoteIPAddress.ToString(), ClientConnection!.Port);
 
-            ConnectionManager.IsConnected = true;
+            ClientConnection!.IsConnected = true;
 
-            LocalMessageEvent($"Connected to {ConnectionManager.RemoteIPAddress}");
+            LocalMessageEvent($"Connected to {ClientConnection!.RemoteIPAddress}");
 
             _remoteWindow = new();
             _remoteWindow.ShowDialog();
