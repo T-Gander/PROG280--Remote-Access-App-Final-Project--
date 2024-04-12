@@ -333,6 +333,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             RemoteWindow _remoteWindow = new();
             _remoteWindow.ShowDialog();
+            ClientConnection.CloseConnections();
             LocalMessageEvent("Connection closed.");
         }
     }
