@@ -38,7 +38,6 @@ namespace PROG280__Remote_Access_App_Client__
         public static Client? ClientConnection;
         public static Server? ServerConnection;
         private LogsWindow _logWindow;
-        private RemoteWindow? _remoteWindow;
 
         public string LocalIPAddress
         {
@@ -324,7 +323,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
-            _remoteWindow = new();
+            RemoteWindow _remoteWindow = new();
             _remoteWindow.ShowDialog();
             LocalMessageEvent("Connection closed.");
         }
