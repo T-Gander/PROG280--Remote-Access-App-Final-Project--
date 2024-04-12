@@ -34,7 +34,8 @@ namespace PROG2800__Remote_Access_App_Client__
             _RemoteWindowDataContext = new(ip);
             DataContext = _RemoteWindowDataContext;
             Task.Run(HandleVideoPackets);
-
+            //Open a messaging window.
+            MessagingWindow messagingWindow = new MessagingWindow();
         }
 
         private async void HandleVideoPackets()

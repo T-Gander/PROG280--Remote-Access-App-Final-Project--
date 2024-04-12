@@ -323,6 +323,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             RemoteWindow _remoteWindow = new(RemoteIPAddress);
             _remoteWindow.ShowDialog();
+
             ClientConnection.CloseConnections();
             await LocalMessageEvent("Connection closed.");
         }
