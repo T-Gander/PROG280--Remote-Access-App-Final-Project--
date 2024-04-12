@@ -39,69 +39,48 @@ namespace PROG280__Remote_Access_App_Client__
         private LogsWindow _logWindow;
         private RemoteWindow? _remoteWindow;
 
-        public string LocalIPAddress {
+        public string LocalIPAddress
+        {
             get
             {
                 return RetreiveLocalIP();
             }
         }
-        public string Port 
-        { 
-            get
-            {
-                if (ClientConnection != null)
-                {
-                    return ClientConnection.Port.ToString();
-                }
-                else if (ServerConnection != null)
-                {
-                    return ServerConnection.Port.ToString();
-                }
-                else return "9000";
-            }
-            set
-            {
-                if(int.TryParse(value, out int result))
-                {
-                    if (ClientConnection != null)
-                    {
-                        ClientConnection.Port = result;
-                    }
-                    else if (ServerConnection != null)
-                    {
-                        ServerConnection.Port = result;
-                    }
-                }
-                OnPropertyChanged(nameof(Port));
-            }
-        } 
-        public string RemoteIPAddress 
+        public string Port
         {
             get
             {
-                if (ClientConnection != null)
-                {
-                    return ClientConnection.RemoteIPAddress;
-                }
-                else if (ServerConnection != null)
-                {
-                    return ServerConnection.RemoteIPAddress;
-                }
-                else return "";
+                return _port;
             }
             set
             {
-                if (ClientConnection != null)
+                if (int.TryParse(value, out int result))
                 {
-                    ClientConnection.RemoteIPAddress = value;
+                    _port = result.ToString();
                 }
-                else if (ServerConnection != null)
+                else
                 {
-                    ServerConnection.RemoteIPAddress = value;
+                    _port = "9000";
                 }
+                OnPropertyChanged(nameof(Port));
+            }
+        }
+
+        private string _port = "9000";
+        public string RemoteIPAddress
+        {
+            get
+            {
+                return _remoteIPAddress;
+            }
+            set
+            {
+                _remoteIPAddress = value;
                 OnPropertyChanged(nameof(RemoteIPAddress));
             }
         }
+
+        private string _remoteIPAddress = "";
 
         public delegate void LocalMessageDelegate(string message);
         public delegate void PacketDelegate(Packet packet);
@@ -331,10 +310,10 @@ namespace PROG280__Remote_Access_App_Client__
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
             ClientConnection = new();
-            LocalMessageEvent($"Attempting to connect to {ClientConnection!.RemoteIPAddress}");
+            LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
             await Task.Delay(1000);
 
-            ClientConnection!.TcpVideoClient = new TcpClient(ClientConnection!.RemoteIPAddress.ToString(), ClientConnection!.Port);
+            ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, Port);
 
             ClientConnection!.IsConnected = true;
 
