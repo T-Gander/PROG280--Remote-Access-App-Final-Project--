@@ -45,7 +45,17 @@ namespace PROG280__Remote_Access_App_Data__
                 var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
 
-                return packet!.ContentType;
+                if(packet != null)
+                {
+                    return packet!.ContentType;
+                }
+                else
+                {
+                    Messages.Add("Failed to recieve stream.");
+                    IsConnected = true;
+                    return MessageType.Failure;
+                }
+                
             }
             catch
             {

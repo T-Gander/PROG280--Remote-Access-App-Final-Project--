@@ -110,19 +110,20 @@ namespace PROG280__Remote_Access_App_Client__
             }
 
             lblAppStatus.Text = message;
+
+            Task.Delay(1000);
         }
 
-        private async Task StopServer()
+        private void StopServer()
         {
             ServerConnection!.ShutDown();
             LocalMessageEvent("Stopping server...");
             ChangeServerState();
-            await Task.Delay(1000);
         }
 
         private async void Stop_Click(object sender, RoutedEventArgs e)
         {
-            await StopServer();
+            StopServer();
         }
 
         private void btnLogs_Click(object sender, RoutedEventArgs e)
@@ -139,7 +140,6 @@ namespace PROG280__Remote_Access_App_Client__
             txtPort.IsEnabled = false;
 
             LocalMessageEvent("Starting server...");
-            Task.Delay(1000);
             ServerConnection.TcpListener = new(IPAddress.Any, Port);
             ServerConnection.TcpListener.Start();
             LocalMessageEvent("Server started!");
@@ -152,7 +152,6 @@ namespace PROG280__Remote_Access_App_Client__
                 case "Stop the Server":
                     try
                     {
-                        await Task.Delay(1000);
                         LocalMessageEvent("Server stopped.");
 
                         btnStartServer.Click -= Stop_Click;
@@ -163,7 +162,6 @@ namespace PROG280__Remote_Access_App_Client__
                         txtServerIp.IsEnabled = true;
                         txtPort.IsEnabled = true;
 
-                        await Task.Delay(1000);
                         LocalMessageEvent("Waiting for Action...");
                     }
                     catch (Exception ex)
@@ -249,27 +247,22 @@ namespace PROG280__Remote_Access_App_Client__
                 ChangeServerState();
 
                 StartServer();
-                await Task.Delay(1000);
 
                 LocalMessageEvent($"Listening on port {Port}.");
-                await Task.Delay(1000);
 
                 LocalMessageEvent("Retreiving external IP...");
-                await Task.Delay(1000);
 
                 if (!TryRetreiveIP())
                 {
-                    await StopServer();
+                    StopServer();
                     return;
                 }
-                await Task.Delay(1000);
 
                 await CheckConnection();
             }
             catch (Exception ex)
             {
                 LocalMessageEvent($"Error logged: {ex.Message})");
-                await Task.Delay(1000); //This will run at the same time as clicking stop
                 LocalMessageEvent($"ERROR, Check Logs.");
             }
         }
@@ -285,7 +278,6 @@ namespace PROG280__Remote_Access_App_Client__
                     if (!ServerConnection!.IsConnected)
                     {
                         LocalMessageEvent("Lost Connection to Remote Client.");
-                        await Task.Delay(1000);
                         LocalMessageEvent("Listening...");
                         await Listen();
                     }
@@ -293,13 +285,12 @@ namespace PROG280__Remote_Access_App_Client__
                     {
                         await ServerConnection!.SendVideoPackets();
                     }
-                    await Task.Delay((int)FrameRate.Thirty); //Tied to fps?
+                    await Task.Delay((int)FrameRate.Thirty); //Tied to fps
                 }
             }
             catch (Exception ex)
             {
                 LocalMessageEvent($"TCP Listener Closed.");
-                await Task.Delay(1000);
             }
         }
 
@@ -309,15 +300,12 @@ namespace PROG280__Remote_Access_App_Client__
             ServerConnection!.TcpVideoClient = await ServerConnection!.TcpListener!.AcceptTcpClientAsync();
             LocalMessageEvent($"Connection Established with {ServerConnection!.TcpVideoClient.Client.RemoteEndPoint}.");
             ServerConnection!.IsConnected = true;
-
-            await Task.Delay(1000);
         }
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
             ClientConnection = new();
             LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
-            await Task.Delay(1000);
 
             try
             {
