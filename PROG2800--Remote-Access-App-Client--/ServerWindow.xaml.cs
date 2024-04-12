@@ -330,6 +330,7 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
+            ClientConnection = new();
             LocalMessageEvent($"Attempting to connect to {ClientConnection!.RemoteIPAddress}");
             await Task.Delay(1000);
 
