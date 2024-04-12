@@ -45,7 +45,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             get
             {
-                return RetreiveLocalIP();
+                return RetreiveLocalIP().Result;
             }
         }
         public int Port
@@ -85,7 +85,7 @@ namespace PROG280__Remote_Access_App_Client__
 
         private string _remoteIPAddress = "";
 
-        public delegate void LocalMessageDelegate(string message);
+        public delegate Task LocalMessageDelegate(string message);
         public delegate void PacketDelegate(Packet packet);
         public event LocalMessageDelegate LocalMessageEvent;
 
@@ -98,7 +98,7 @@ namespace PROG280__Remote_Access_App_Client__
             _logWindow = new();
         }
 
-        private void ServerStatusUpdate(string message)
+        private async Task ServerStatusUpdate(string message)
         {
             if (message == "Server started!")
             {
@@ -111,13 +111,13 @@ namespace PROG280__Remote_Access_App_Client__
 
             lblAppStatus.Text = message;
 
-            Task.Delay(1000);
+            await Task.Delay(1000);
         }
 
-        private void StopServer()
+        private async void StopServer()
         {
             ServerConnection!.ShutDown();
-            LocalMessageEvent("Stopping server...");
+            await LocalMessageEvent?.Invoke("Stopping server...")!;
             ChangeServerState();
         }
 
@@ -152,7 +152,7 @@ namespace PROG280__Remote_Access_App_Client__
                 case "Stop the Server":
                     try
                     {
-                        LocalMessageEvent("Server stopped.");
+                        await LocalMessageEvent("Server stopped.");
 
                         btnStartServer.Click -= Stop_Click;
                         btnStartServer.Click += btnStartServer_Click;
@@ -162,11 +162,11 @@ namespace PROG280__Remote_Access_App_Client__
                         txtServerIp.IsEnabled = true;
                         txtPort.IsEnabled = true;
 
-                        LocalMessageEvent("Waiting for Action...");
+                        await LocalMessageEvent("Waiting for Action...");
                     }
                     catch (Exception ex)
                     {
-                        LocalMessageEvent($"Something went wrong, error: {ex.Message}");
+                        await LocalMessageEvent($"Something went wrong, error: {ex.Message}");
                     }
                     break;
 
@@ -182,7 +182,7 @@ namespace PROG280__Remote_Access_App_Client__
             }
         }
 
-        private bool TryRetreiveIP()
+        private async Task<bool> TryRetreiveIP()
         {
             try
             {
@@ -198,23 +198,23 @@ namespace PROG280__Remote_Access_App_Client__
                         i--;
                     }
                     else
-                        LocalMessageEvent($"Found IP: {ipstring}");
+                        await LocalMessageEvent($"Found IP: {ipstring}");
                 }
 
                 txtServerIp.Text = $"{localIPs[0]}";
 
-                LocalMessageEvent($"Selected IP: {txtServerIp.Text}");
+                await LocalMessageEvent($"Selected IP: {txtServerIp.Text}");
                 return true;
             }
             catch (Exception ex)
             {
                 txtServerIp.Text = "ERROR";
-                LocalMessageEvent($"{ex.Message}");
+                await LocalMessageEvent($"{ex.Message}");
                 return false;
             }
         }
 
-        private string RetreiveLocalIP()
+        private async Task<string> RetreiveLocalIP()
         {
             try
             {
@@ -235,7 +235,7 @@ namespace PROG280__Remote_Access_App_Client__
             }
             catch (Exception ex)
             {
-                LocalMessageEvent($"{ex.Message}");
+                await LocalMessageEvent($"{ex.Message}");
                 return "Error, Check Logs.";
             }
         }
@@ -248,11 +248,11 @@ namespace PROG280__Remote_Access_App_Client__
 
                 StartServer();
 
-                LocalMessageEvent($"Listening on port {Port}.");
+                await LocalMessageEvent($"Listening on port {Port}.");
 
-                LocalMessageEvent("Retreiving external IP...");
+                await LocalMessageEvent("Retreiving external IP...");
 
-                if (!TryRetreiveIP())
+                if (!await TryRetreiveIP())
                 {
                     StopServer();
                     return;
@@ -262,8 +262,8 @@ namespace PROG280__Remote_Access_App_Client__
             }
             catch (Exception ex)
             {
-                LocalMessageEvent($"Error logged: {ex.Message})");
-                LocalMessageEvent($"ERROR, Check Logs.");
+                await LocalMessageEvent($"Error logged: {ex.Message})");
+                await LocalMessageEvent($"ERROR, Check Logs.");
             }
         }
 
@@ -277,8 +277,8 @@ namespace PROG280__Remote_Access_App_Client__
                 {
                     if (!ServerConnection!.IsConnected)
                     {
-                        LocalMessageEvent("Lost Connection to Remote Client.");
-                        LocalMessageEvent("Listening...");
+                        await LocalMessageEvent("Lost Connection to Remote Client.");
+                        await LocalMessageEvent("Listening...");
                         await Listen();
                     }
                     else
@@ -290,22 +290,22 @@ namespace PROG280__Remote_Access_App_Client__
             }
             catch (Exception ex)
             {
-                LocalMessageEvent($"TCP Listener Closed.");
+                await LocalMessageEvent($"TCP Listener Closed.");
             }
         }
 
         private async Task Listen()
         {
-            LocalMessageEvent("Listening...");
+            await LocalMessageEvent("Listening...");
             ServerConnection!.TcpVideoClient = await ServerConnection!.TcpListener!.AcceptTcpClientAsync();
-            LocalMessageEvent($"Connection Established with {ServerConnection!.TcpVideoClient.Client.RemoteEndPoint}.");
+            await LocalMessageEvent($"Connection Established with {ServerConnection!.TcpVideoClient.Client.RemoteEndPoint}.");
             ServerConnection!.IsConnected = true;
         }
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
             ClientConnection = new();
-            LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
+            await LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
 
             try
             {
@@ -313,18 +313,18 @@ namespace PROG280__Remote_Access_App_Client__
             }
             catch
             {
-                LocalMessageEvent($"Connection Refused.");
+                await LocalMessageEvent($"Connection Refused.");
                 return;
             }
 
             ClientConnection!.IsConnected = true;
 
-            LocalMessageEvent($"Connected to {RemoteIPAddress}");
+            await LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
             RemoteWindow _remoteWindow = new(RemoteIPAddress);
             _remoteWindow.ShowDialog();
             ClientConnection.CloseConnections();
-            LocalMessageEvent("Connection closed.");
+            await LocalMessageEvent("Connection closed.");
         }
     }
 }

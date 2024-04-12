@@ -24,9 +24,10 @@ namespace PROG280__Remote_Access_App_Data__
 
         public static ObservableCollection<string> Messages { get; set; } = new();
 
-        public static void AddToMessagesList(string message)
+        public static Task AddToMessagesList(string message)
         {
             Messages.Add(message);
+            return Task.CompletedTask;
         }
 
         public void CloseConnections()
