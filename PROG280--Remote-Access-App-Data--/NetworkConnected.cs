@@ -87,14 +87,14 @@ namespace PROG280__Remote_Access_App_Data__
                 Packet messagePacket = new Packet()
                 {
                     ContentType = MessageType.Message,
-                    Payload = message
+                    Payload = $"{DisplayName}: {message}"
                 };
 
                 byte[] initialpacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messagePacket));
 
                 await _messageStream.WriteAsync(initialpacket, 0, initialpacket.Length);
 
-                ChatMessages.Add(message);
+                ChatMessages.Add($"{DisplayName}: {message}");
             }
             catch (Exception ex)
             {
