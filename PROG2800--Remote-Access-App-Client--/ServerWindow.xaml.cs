@@ -30,7 +30,7 @@ namespace PROG280__Remote_Access_App_Client__
     {
         public enum FrameRate { Thirty = 34, Sixty = 17, OneTwenty = 9 }
 
-        private MessagingWindow _messagingWindow;
+        private MessagingWindow? _messagingWindow;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -50,27 +50,49 @@ namespace PROG280__Remote_Access_App_Client__
                 return RetreiveLocalIP().Result;
             }
         }
-        public int Port
+        public int VideoPort
         {
             get
             {
-                return int.Parse(_port);
+                return int.Parse(_videoPort);
             }
             set
             {
                 if (int.TryParse(value.ToString(), out int result))
                 {
-                    _port = result.ToString();
+                    _videoPort = result.ToString();
                 }
                 else
                 {
-                    _port = "9000";
+                    _videoPort = "9000";
                 }
-                OnPropertyChanged(nameof(Port));
+                OnPropertyChanged(nameof(VideoPort));
             }
         }
 
-        private string _port = "9000";
+        private string _videoPort = "9000";
+
+        public int MessagePort
+        {
+            get
+            {
+                return int.Parse(_messagePort);
+            }
+            set
+            {
+                if (int.TryParse(value.ToString(), out int result))
+                {
+                    _messagePort = result.ToString();
+                }
+                else
+                {
+                    _messagePort = "9000";
+                }
+                OnPropertyChanged(nameof(VideoPort));
+            }
+        }
+
+        private string _messagePort = "9001";
 
         public string RemoteIPAddress
         {
@@ -139,10 +161,9 @@ namespace PROG280__Remote_Access_App_Client__
 
             btnRequestConnection.IsEnabled = false;
             txtServerIp.IsEnabled = false;
-            txtPort.IsEnabled = false;
 
             LocalMessageEvent("Starting server...");
-            ServerConnection.TcpListener = new(IPAddress.Any, Port);
+            ServerConnection.TcpListener = new(IPAddress.Any, VideoPort);
             ServerConnection.TcpListener.Start();
             LocalMessageEvent("Server started!");
         }
@@ -162,7 +183,6 @@ namespace PROG280__Remote_Access_App_Client__
 
                         btnRequestConnection.IsEnabled = true;
                         txtServerIp.IsEnabled = true;
-                        txtPort.IsEnabled = true;
 
                         await LocalMessageEvent("Waiting for Action...");
                     }
@@ -179,7 +199,6 @@ namespace PROG280__Remote_Access_App_Client__
 
                     btnRequestConnection.IsEnabled = false;
                     txtServerIp.IsEnabled = false;
-                    txtPort.IsEnabled = false;
                     break;
             }
         }
@@ -250,7 +269,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                 StartServer();
 
-                await LocalMessageEvent($"Listening on port {Port}.");
+                await LocalMessageEvent($"Listening on port {VideoPort}.");
 
                 await LocalMessageEvent("Retreiving external IP...");
 
@@ -313,7 +332,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             try
             {
-                ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, Port);
+                ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, VideoPort);
             }
             catch
             {
@@ -325,28 +344,38 @@ namespace PROG280__Remote_Access_App_Client__
 
             await LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
+            var tcs = new TaskCompletionSource<object?>();
+
+            // Use a TaskCompletionSource to create a task that completes when the RemoteWindow is closed
+
+            void RemoteWindow_Closed(object sender, EventArgs e)
+            {
+                tcs.TrySetResult(null); // Signal that the task is completed
+            }
+
             RemoteWindow _remoteWindow = new(RemoteIPAddress);
+            _remoteWindow.Closed += RemoteWindow_Closed;
             _remoteWindow.Show();
 
-            _messagingWindow = new();
+            _messagingWindow = new MessagingWindow();
             _messagingWindow.Show();
 
-            //Used to stop code running until remoteWindow is closed.
-            await Task.Run(new Action(async () =>
-            {
-                while (_remoteWindow.IsActive)
-                {
-                    await Task.Delay(1000);
-                }
-            }));
+            // Wait asynchronously for the RemoteWindow to be closed
+            await tcs.Task;
 
-            if(_messagingWindow != null)
+            if (_messagingWindow != null)
             {
                 _messagingWindow.Close();
             }
 
             ClientConnection.CloseConnections();
             await LocalMessageEvent("Connection closed.");
+        }
+
+        private void btnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsWindow settingsWindow = new SettingsWindow(this);
+            settingsWindow.ShowDialog();
         }
     }
 }

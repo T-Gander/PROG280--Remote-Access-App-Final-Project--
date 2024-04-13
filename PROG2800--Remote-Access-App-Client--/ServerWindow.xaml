@@ -31,19 +31,18 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Label Grid.Column="1" VerticalAlignment="Center">Server IP:</Label>
-        <TextBox x:Name="txtServerIp" Grid.Column="2" Grid.ColumnSpan="2" Height="30" VerticalContentAlignment="Center" Text="{Binding Path=RemoteIPAddress}"></TextBox>
-        <Label Grid.Column="1" Grid.Row="1" VerticalAlignment="Center">Local IP:</Label>
-        <Label Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Center" Content="{Binding Path=LocalIPAddress}"></Label>
-        <Label VerticalAlignment="Center" Grid.Column="4">Port:</Label>
-        <TextBox x:Name="txtPort" Grid.Column="5" Height="30" VerticalContentAlignment="Center" Text="{Binding Path=Port}"></TextBox>
+        <Label VerticalAlignment="Center">Server IP:</Label>
+        <TextBox x:Name="txtServerIp" Grid.Column="1" Grid.ColumnSpan="2" Height="30" VerticalContentAlignment="Center" Text="{Binding Path=RemoteIPAddress}"></TextBox>
+        <Label Grid.Row="1" VerticalAlignment="Center">Local IP:</Label>
+        <Label Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Center" Content="{Binding Path=LocalIPAddress}"></Label>
         <Button Grid.Column="7" x:Name="btnRequestConnection" Click="btnRequestConnection_Click" Height="30" Grid.ColumnSpan="2">Request Connection</Button>
         <Label Grid.Column="9" VerticalAlignment="Center" HorizontalAlignment="Center">-Or-</Label>
         <Button Grid.Column="10" x:Name="btnStartServer" Height="30" Grid.ColumnSpan="2" Click="btnStartServer_Click">Start a Server</Button>
 
-        <Label Margin="0,0,10,0" Grid.Row="2" Grid.RowSpan="3" VerticalAlignment="Center" Grid.Column="1" Grid.ColumnSpan="2" FontSize="40" HorizontalAlignment="Right">Status:</Label>
-        <TextBlock TextWrapping="Wrap" x:Name="lblAppStatus" Margin="10,0,0,0" Grid.Row="2" Grid.RowSpan="3" VerticalAlignment="Center" Grid.Column="3" Grid.ColumnSpan="9" FontSize="40" HorizontalAlignment="Left">Waiting for Action...</TextBlock>
+        <Label Margin="0,0,10,0" Grid.Row="2" VerticalAlignment="Center" Grid.ColumnSpan="2" FontSize="40">Status:</Label>
+        <TextBlock TextWrapping="Wrap" x:Name="lblAppStatus" Margin="10,0,0,0" Grid.Row="3" Grid.RowSpan="3" Grid.ColumnSpan="12" FontSize="20">Waiting for Action...</TextBlock>
 
         <Button x:Name="btnLogs" Grid.Row="6" Grid.Column="10" Height="30" Grid.ColumnSpan="2" Click="btnLogs_Click">Logs</Button>
+        <Button x:Name="btnSettings" Grid.Row="6" Height="30" Grid.ColumnSpan="2" Click="btnSettings_Click">Settings</Button>
     </Grid>
 </Window>
