@@ -165,6 +165,8 @@ namespace PROG280__Remote_Access_App_Client__
             LocalMessageEvent("Starting server...");
             ServerConnection.TcpVideoListener = new(IPAddress.Any, VideoPort);
             ServerConnection.TcpVideoListener.Start();
+            ServerConnection.TcpMessageListener = new(IPAddress.Any, VideoPort);
+            ServerConnection.TcpMessageListener.Start();
             LocalMessageEvent("Server started!");
         }
 
@@ -321,7 +323,6 @@ namespace PROG280__Remote_Access_App_Client__
             ServerConnection!.TcpVideoClient = await ServerConnection!.TcpVideoListener!.AcceptTcpClientAsync();
             ServerConnection!.TcpMessageClient = await ServerConnection!.TcpMessageListener!.AcceptTcpClientAsync();
 
-            //await ServerConnection!.InitializeMessaging(ServerConnection.TcpVideoClient.Client.RemoteEndPoint!.ToString()!, MessagePort);
             await LocalMessageEvent($"Connection Established with {ServerConnection!.TcpVideoClient.Client.RemoteEndPoint}.");
             ServerConnection!.IsConnected = true;
             _messagingWindow = new MessagingWindow(ServerConnection);
@@ -335,10 +336,8 @@ namespace PROG280__Remote_Access_App_Client__
 
             try
             {
-                ClientConnection!.TcpMessageClient = await ClientConnection!.TcpMessageListener!.AcceptTcpClientAsync();
                 ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, VideoPort);
-
-                await ClientConnection!.InitializeMessaging(RemoteIPAddress, MessagePort);
+                ClientConnection!.TcpMessageClient = new TcpClient(RemoteIPAddress, MessagePort);
             }
             catch
             {
