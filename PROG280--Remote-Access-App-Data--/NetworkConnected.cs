@@ -18,6 +18,8 @@ namespace PROG280__Remote_Access_App_Data__
         protected const int _chunkSize = 1024;
         protected const int _packetSize = 1500;
 
+        public string? DisplayName { get; set; } = "Lazy User";
+
         public TcpListener? TcpMessageListener { get; set; }
         public TcpListener? TcpVideoListener { get; set; }
         public TcpClient? TcpVideoClient { get; set; }
@@ -91,6 +93,8 @@ namespace PROG280__Remote_Access_App_Data__
                 byte[] initialpacket = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messagePacket));
 
                 await _messageStream.WriteAsync(initialpacket, 0, initialpacket.Length);
+
+                ChatMessages.Add(message);
             }
             catch (Exception ex)
             {

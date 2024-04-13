@@ -1,4 +1,5 @@
 ﻿using PROG280__Remote_Access_App_Data__;
+using PROG2800__Remote_Access_App_Client__.MessagingWindowComponents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,28 @@ namespace PROG2800__Remote_Access_App_Client__
             InitializeComponent();
             DataContext = appType;
             _AppType = appType;
+
+            Task.WaitAll(AskForDisplayName());
+            
             appType.ReceiveMessages();
+        }
+
+        private async Task AskForDisplayName()
+        {
+            var tcs = new TaskCompletionSource<object?>();
+
+            // Use a TaskCompletionSource to create a task that completes when the RemoteWindow is closed
+
+            void DisplayNameWindow_Closed(object sender, EventArgs e)
+            {
+                tcs.TrySetResult(null); // Signal that the task is completed
+            }
+
+            DisplayName _displayNameWindow = new(_AppType);
+            _displayNameWindow.Closed += DisplayNameWindow_Closed;
+            _displayNameWindow.Show();
+
+            await tcs.Task;
         }
 
         //A way of listening for messages for both Client and Server.
