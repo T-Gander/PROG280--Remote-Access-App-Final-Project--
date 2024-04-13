@@ -293,8 +293,6 @@ namespace PROG280__Remote_Access_App_Client__
             try
             {
                 await Listen();
-                _messagingWindow = new();
-                _messagingWindow.Show();
 
                 while (true)
                 {
@@ -323,6 +321,8 @@ namespace PROG280__Remote_Access_App_Client__
             ServerConnection!.TcpVideoClient = await ServerConnection!.TcpListener!.AcceptTcpClientAsync();
             await LocalMessageEvent($"Connection Established with {ServerConnection!.TcpVideoClient.Client.RemoteEndPoint}.");
             ServerConnection!.IsConnected = true;
+            _messagingWindow = new MessagingWindow();
+            _messagingWindow.Show();
         }
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
