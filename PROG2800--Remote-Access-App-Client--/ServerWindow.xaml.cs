@@ -30,6 +30,8 @@ namespace PROG280__Remote_Access_App_Client__
     {
         public enum FrameRate { Thirty = 34, Sixty = 17, OneTwenty = 9 }
 
+        private MessagingWindow _messagingWindow;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
@@ -121,7 +123,7 @@ namespace PROG280__Remote_Access_App_Client__
             ChangeServerState();
         }
 
-        private async void Stop_Click(object sender, RoutedEventArgs e)
+        private void Stop_Click(object sender, RoutedEventArgs e)
         {
             StopServer();
         }
@@ -272,6 +274,8 @@ namespace PROG280__Remote_Access_App_Client__
             try
             {
                 await Listen();
+                _messagingWindow = new();
+                _messagingWindow.Show();
 
                 while (true)
                 {
@@ -322,7 +326,24 @@ namespace PROG280__Remote_Access_App_Client__
             await LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
             RemoteWindow _remoteWindow = new(RemoteIPAddress);
-            _remoteWindow.ShowDialog();
+            _remoteWindow.Show();
+
+            _messagingWindow = new();
+            _messagingWindow.Show();
+
+            //Used to stop code running until remoteWindow is closed.
+            await Task.Run(new Action(async () =>
+            {
+                while (_remoteWindow.IsActive)
+                {
+                    await Task.Delay(1000);
+                }
+            }));
+
+            if(_messagingWindow != null)
+            {
+                _messagingWindow.Close();
+            }
 
             ClientConnection.CloseConnections();
             await LocalMessageEvent("Connection closed.");
