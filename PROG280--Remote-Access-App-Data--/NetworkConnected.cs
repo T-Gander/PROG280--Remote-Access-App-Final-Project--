@@ -17,11 +17,20 @@ using static PROG280__Remote_Access_App_Data__.Packet;
 using PROG280__Remote_Access_App_Data__;
 using System.Runtime.CompilerServices;
 using System.Net.Http;
+using System.ComponentModel;
+using System.Windows.Controls;
 
 namespace PROG280__Remote_Access_App_Data__
 {
-    public class NetworkConnected
+    public class NetworkConnected : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public delegate void FrameDelegate(BitmapImage frame);
         public event FrameDelegate FrameHandler;
 
@@ -32,11 +41,23 @@ namespace PROG280__Remote_Access_App_Data__
         public delegate void ChatDelegate(string message);
         public event ChatDelegate ChatHandler;
 
-        public BitmapImage? CurrentFrame { get; set; }
+        public BitmapImage? CurrentFrame
+        {
+            get
+            {
+                return _currentFrame;
+            }
+            set
+            {
+                _currentFrame = value;
+                OnPropertyChanged(nameof(Frame));
+            }
+        }
+
+        private BitmapImage? _currentFrame;
 
         public bool ReceivingFile = false;
         public string ReceivingFileName = "";
-        
 
         public NetworkConnected()
         {
