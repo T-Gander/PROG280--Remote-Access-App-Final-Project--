@@ -154,7 +154,7 @@ namespace PROG280__Remote_Access_App_Data__
             await _dataStream.WriteAsync(fileBytes, 0, fileBytes.Length);
         }
 
-        protected async Task ReceivePacket()
+        public async Task ReceivePackets()
         {
             _dataStream = TcpClientData!.GetStream();
 
