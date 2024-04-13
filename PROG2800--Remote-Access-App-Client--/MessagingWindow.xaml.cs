@@ -89,6 +89,7 @@ namespace PROG2800__Remote_Access_App_Client__
         private async void btnSendMessage_Click(object sender, RoutedEventArgs e)
         {
             NetworkConnected client = (NetworkConnected)DataContext;
+            NetworkConnected.ChatMessages.Add(txtMessage.Text);
             await client.SendPacket(MessageType.Message, txtMessage.Text);
         }
     }
