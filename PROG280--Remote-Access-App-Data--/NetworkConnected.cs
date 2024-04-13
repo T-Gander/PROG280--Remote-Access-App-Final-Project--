@@ -52,8 +52,8 @@ namespace PROG280__Remote_Access_App_Data__
 
         public bool IsConnected { get; set; } = false;
 
-        protected const int _chunkSize = 1024;
-        protected const int _packetSize = 1500;
+        public int ChunkSize = 1024;
+        public int PacketSize = 1500;
 
         public string? DisplayName { get; set; } = "Lazy User";
 
@@ -99,7 +99,7 @@ namespace PROG280__Remote_Access_App_Data__
                 ContentType = MessageType.Acknowledgement
             };
 
-            byte[] ackBytes = new byte[_packetSize];
+            byte[] ackBytes = new byte[PacketSize];
 
             Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ackPacket)).CopyTo(ackBytes, 0);
 
@@ -141,7 +141,7 @@ namespace PROG280__Remote_Access_App_Data__
         {
             _dataStream = TcpClientData!.GetStream();
 
-            byte[] fileBytes = new byte[_packetSize];
+            byte[] fileBytes = new byte[PacketSize];
 
             Packet filePacket = new Packet()
             {
@@ -158,7 +158,7 @@ namespace PROG280__Remote_Access_App_Data__
         {
             _dataStream = TcpClientData!.GetStream();
 
-            byte[] buffer = new byte[_packetSize];
+            byte[] buffer = new byte[PacketSize];
             int bytesRead = await _dataStream!.ReadAsync(buffer, 0, buffer.Length);
             var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
             Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;

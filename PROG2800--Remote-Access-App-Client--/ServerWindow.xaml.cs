@@ -21,6 +21,8 @@ using PROG2800__Remote_Access_App_Client__;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using static PROG280__Remote_Access_App_Data__.Packet;
+using System.IO;
+using System.Drawing.Imaging;
 
 namespace PROG280__Remote_Access_App_Client__
 {
@@ -269,7 +271,28 @@ namespace PROG280__Remote_Access_App_Client__
                     }
                     else
                     {
-                        await Client!.SendPacket(MessageType.FrameChunk, Client!.GrabScreen());
+                        byte[] imageData;
+                        using (MemoryStream memoryStream = new MemoryStream())
+                        {
+                            Client!.GrabScreen().Save(memoryStream, ImageFormat.Png); // Save the bitmap to the memory stream as PNG format
+                            imageData = memoryStream.ToArray(); // Get the byte array from the memory stream
+                        }
+
+                        List<byte> frameChunks = new List<byte>();
+
+                        int totalChunks = (int)Math.Ceiling((double)imageData.Length / (double)1024);
+                        int chunkIndex = 0;
+
+                        while(chunkIndex != totalChunks)
+                        {
+                            int offset = chunkIndex * Client!.ChunkSize;
+                            int length = Math.Min(Client!.ChunkSize, imageData.Length - offset);
+                            byte[] chunk = new byte[Client!.ChunkSize];
+                            Buffer.BlockCopy(imageData, offset, chunk, 0, length);
+
+                            // Serialize packet and send
+                            await Client!.SendPacket(MessageType.FrameChunk, imageData);
+                        }
                     }
                     await Task.Delay((int)FrameRate.Thirty); //Tied to fps
                 }
