@@ -156,66 +156,70 @@ namespace PROG280__Remote_Access_App_Data__
 
         public async Task ReceivePackets()
         {
-            _dataStream = TcpClientData!.GetStream();
-
-            byte[] buffer = new byte[PacketSize];
-            int bytesRead = await _dataStream!.ReadAsync(buffer, 0, buffer.Length);
-            var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;
-
-            if(packet == null)
+            while (true)
             {
-                return;
+                _dataStream = TcpClientData!.GetStream();
+
+                byte[] buffer = new byte[PacketSize];
+                int bytesRead = await _dataStream!.ReadAsync(buffer, 0, buffer.Length);
+                var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;
+
+                if (packet == null)
+                {
+                    return;
+                }
+
+                switch (packet.ContentType)
+                {
+                    case MessageType.FrameChunk:
+                        byte[] chunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
+                        ChunkHandler(chunk);
+                        break;
+
+                    case MessageType.FrameEnd:
+                        byte[] bitmapBytes = frameChunks.ToArray();
+                        frameChunks.Clear();
+                        BitmapImage? frame;
+
+                        using (MemoryStream mstream = new(bitmapBytes))
+                        {
+                            frame = new BitmapImage();
+                            frame.BeginInit();
+                            frame.StreamSource = mstream;
+                            frame.CacheOption = BitmapCacheOption.OnLoad;
+                            frame.EndInit();
+                        }
+                        FrameHandler(frame);
+                        break;
+
+                    case MessageType.Message:
+                        string message = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
+                        ChatHandler(message);
+                        break;
+
+                    case MessageType.FileChunk:
+                        if (!ReceivingFile)
+                        {
+                            ReceivingFileName = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
+                        }
+
+                        byte[] fileChunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
+                        FileChunkHandler(fileChunk);
+                        break;
+
+                    case MessageType.FileEnd:
+                        ReceivingFile = false;
+                        byte[] fileBytes = fileChunks.ToArray();
+                        fileChunks.Clear();
+
+                        File.WriteAllBytes($"{AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}", fileBytes);
+
+                        ChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName} from remote computer.");
+                        break;
+                }
             }
-
-            switch (packet.ContentType)
-            {
-                case MessageType.FrameChunk:
-                    byte[] chunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
-                    ChunkHandler(chunk);
-                    break;
-
-                case MessageType.FrameEnd:
-                    byte[] bitmapBytes = frameChunks.ToArray();
-                    frameChunks.Clear();
-                    BitmapImage? frame;
-
-                    using (MemoryStream mstream = new(bitmapBytes))
-                    {
-                        frame = new BitmapImage();
-                        frame.BeginInit();
-                        frame.StreamSource = mstream;
-                        frame.CacheOption = BitmapCacheOption.OnLoad;
-                        frame.EndInit();
-                    }
-                    FrameHandler(frame);
-                    break;
-
-                case MessageType.Message:
-                    string message = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
-                    ChatHandler(message);
-                    break;
-
-                case MessageType.FileChunk:
-                    if (!ReceivingFile)
-                    {
-                        ReceivingFileName = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
-                    }
-
-                    byte[] fileChunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
-                    FileChunkHandler(fileChunk);
-                    break;
-
-                case MessageType.FileEnd:
-                    ReceivingFile = false;
-                    byte[] fileBytes = fileChunks.ToArray();
-                    fileChunks.Clear();
-
-                    File.WriteAllBytes($"{AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}", fileBytes);
-
-                    ChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName} from remote computer.");
-                    break;
-            }
+            
         }
     }
 }
