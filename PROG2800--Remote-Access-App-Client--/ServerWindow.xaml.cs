@@ -291,7 +291,7 @@ namespace PROG280__Remote_Access_App_Client__
                             Buffer.BlockCopy(imageData, offset, chunk, 0, length);
 
                             // Serialize packet and send
-                            await Client!.SendPacket(MessageType.FrameChunk, imageData);
+                            await Client!.SendPacket(MessageType.FrameChunk, chunk);
                         }
 
                         await Client!.SendPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
