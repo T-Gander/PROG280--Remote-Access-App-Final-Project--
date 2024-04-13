@@ -91,6 +91,7 @@ namespace PROG2800__Remote_Access_App_Client__
             NetworkConnected client = (NetworkConnected)DataContext;
             client.ChatMessages.Add($"{client.DisplayName}: {txtMessage.Text}");
             await client.SendPacket(MessageType.Message, txtMessage.Text);
+            txtMessage.Text = "";
         }
     }
 }
