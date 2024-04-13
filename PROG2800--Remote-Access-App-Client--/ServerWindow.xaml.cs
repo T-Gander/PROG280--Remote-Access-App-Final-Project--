@@ -297,7 +297,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                         await Client!.SendPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
                     }
-                    await Task.Delay((int)FrameRate.Thirty); //Tied to fps
+                    await Task.Delay(1000); //Tied to fps
                 }
             }
             catch (Exception ex)
