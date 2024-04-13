@@ -42,7 +42,7 @@ namespace PROG280__Remote_Access_App_Client__
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public static NetworkConnected? Client;
+        public NetworkConnected? Client = new();
         private LogsWindow _logWindow;
 
         public string LocalIPAddress
@@ -83,9 +83,9 @@ namespace PROG280__Remote_Access_App_Client__
         {
             InitializeComponent();
             DataContext = this;
-            LocalMessageEvent += NetworkConnected.AddToLogMessagesList;
+            LocalMessageEvent += Client.AddToLogMessagesList;
             LocalMessageEvent += ServerStatusUpdate;
-            _logWindow = new();
+            _logWindow = new(Client);
         }
 
         private async Task ServerStatusUpdate(string message)

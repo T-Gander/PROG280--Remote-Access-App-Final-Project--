@@ -21,11 +21,11 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class LogsWindow : Window
     {
-        public LogsWindow()
+        public LogsWindow(NetworkConnected client)
         {
             InitializeComponent();
 
-            DataContext = NetworkConnected.LogMessages;
+            DataContext = client.LogMessages;
         }
 
         protected override void OnClosing(CancelEventArgs e)

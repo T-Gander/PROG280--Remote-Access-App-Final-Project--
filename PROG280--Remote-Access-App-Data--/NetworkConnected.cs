@@ -62,11 +62,11 @@ namespace PROG280__Remote_Access_App_Data__
 
         protected NetworkStream? _dataStream { get; set; }
 
-        public static ObservableCollection<string> LogMessages { get; set; } = new();
+        public ObservableCollection<string> LogMessages { get; set; } = new();
 
-        public static ObservableCollection<string> ChatMessages {  get; set; } = new();
+        public ObservableCollection<string> ChatMessages {  get; set; } = new();
 
-        public static Task AddToLogMessagesList(string message)
+        public Task AddToLogMessagesList(string message)
         {
             LogMessages.Add(message);
             return Task.CompletedTask;
