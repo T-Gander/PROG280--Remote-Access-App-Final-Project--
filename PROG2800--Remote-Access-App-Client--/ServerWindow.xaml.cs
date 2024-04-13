@@ -334,7 +334,7 @@ namespace PROG280__Remote_Access_App_Client__
             try
             {
                 ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, VideoPort);
-                ClientConnection!.InitializeMessaging(RemoteIPAddress, MessagePort);
+                await ClientConnection!.InitializeMessaging(RemoteIPAddress, MessagePort);
             }
             catch
             {
@@ -359,7 +359,7 @@ namespace PROG280__Remote_Access_App_Client__
             _remoteWindow.Closed += RemoteWindow_Closed;
             _remoteWindow.Show();
 
-            _messagingWindow = new MessagingWindow();
+            _messagingWindow = new MessagingWindow(ClientConnection);
             _messagingWindow.Show();
 
             // Wait asynchronously for the RemoteWindow to be closed
