@@ -140,7 +140,10 @@ namespace PROG280__Remote_Access_App_Data__
 
         private void HandleFrames(BitmapImage? frame)
         {
-            CurrentFrame = frame;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                CurrentFrame = frame;
+            });
         }
 
         private void HandleChatMessages(string message)
@@ -151,7 +154,6 @@ namespace PROG280__Remote_Access_App_Data__
                 // For example, adding items to a collection bound to a UI control
                 ChatMessages.Add($"{DisplayName}: {message}");
             });
-            
         }
 
         public Bitmap GrabScreen()
