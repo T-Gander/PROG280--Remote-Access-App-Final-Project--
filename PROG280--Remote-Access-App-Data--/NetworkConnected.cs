@@ -56,6 +56,7 @@ namespace PROG280__Remote_Access_App_Data__
         public async Task InitializeMessaging(string remoteip, int messagePort)
         {
             TcpMessageListener = new(IPAddress.Any, messagePort);
+            TcpMessageListener.Start();
             await Task.Delay(1000);
             TcpMessageClient =  new(remoteip, messagePort);
         }
