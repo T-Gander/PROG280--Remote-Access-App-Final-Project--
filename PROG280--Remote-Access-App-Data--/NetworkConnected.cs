@@ -158,8 +158,6 @@ namespace PROG280__Remote_Access_App_Data__
         {
             try
             {
-
-
                 while (true)
                 {
                     _dataStream = TcpClientData!.GetStream();

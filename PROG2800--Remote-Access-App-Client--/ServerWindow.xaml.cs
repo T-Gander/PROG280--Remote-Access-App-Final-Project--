@@ -292,6 +292,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                             // Serialize packet and send
                             await Client!.SendPacket(MessageType.FrameChunk, chunk);
+                            chunkIndex++;
                         }
 
                         await Client!.SendPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
