@@ -25,7 +25,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             InitializeComponent();
 
-            DataContext = NetworkConnected.Messages;
+            DataContext = NetworkConnected.LogMessages;
         }
 
         protected override void OnClosing(CancelEventArgs e)

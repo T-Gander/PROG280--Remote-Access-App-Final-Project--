@@ -51,7 +51,7 @@ namespace PROG280__Remote_Access_App_Data__
                 }
                 else
                 {
-                    Messages.Add("Failed to recieve stream.");
+                    LogMessages.Add("Failed to recieve stream.");
                     IsConnected = true;
                     return MessageType.Failure;
                 }
@@ -59,7 +59,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
             catch
             {
-                Messages.Add("Exception: Didn't receive ack packet. And stream is closed.");
+                LogMessages.Add("Exception: Didn't receive ack packet. And stream is closed.");
                 IsConnected = false;
 
                 return MessageType.Failure;
@@ -132,7 +132,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
             catch (Exception ex)
             {
-                AddToMessagesList(ex.Message);
+                AddToLogMessagesList(ex.Message);
             }
         }
 

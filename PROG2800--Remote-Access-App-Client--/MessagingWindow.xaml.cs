@@ -1,6 +1,8 @@
-﻿using System;
+﻿using PROG280__Remote_Access_App_Data__;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,9 +21,14 @@ namespace PROG2800__Remote_Access_App_Client__
     /// </summary>
     public partial class MessagingWindow : Window
     {
-        public MessagingWindow()
+        private NetworkConnected _AppType;
+
+        public MessagingWindow(NetworkConnected appType)
         {
             InitializeComponent();
+            DataContext = appType;
+            _AppType = appType;
+            appType.ReceiveMessages();
         }
 
         //A way of listening for messages for both Client and Server.
@@ -29,6 +36,8 @@ namespace PROG2800__Remote_Access_App_Client__
         //A way of sending files for the Client.
 
         //A way to control the server PC.
+
+        
 
         private void btnRequestControl_Click(object sender, RoutedEventArgs e)
         {
@@ -40,9 +49,9 @@ namespace PROG2800__Remote_Access_App_Client__
 
         }
 
-        private void btnSendMessage_Click(object sender, RoutedEventArgs e)
+        private async void btnSendMessage_Click(object sender, RoutedEventArgs e)
         {
-
+            await _AppType.SendMessage(txtMessage.Text);
         }
     }
 }

@@ -117,7 +117,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             InitializeComponent();
             DataContext = this;
-            LocalMessageEvent += NetworkConnected.AddToMessagesList;
+            LocalMessageEvent += NetworkConnected.AddToLogMessagesList;
             LocalMessageEvent += ServerStatusUpdate;
             _logWindow = new();
         }
@@ -163,8 +163,8 @@ namespace PROG280__Remote_Access_App_Client__
             txtServerIp.IsEnabled = false;
 
             LocalMessageEvent("Starting server...");
-            ServerConnection.TcpListener = new(IPAddress.Any, VideoPort);
-            ServerConnection.TcpListener.Start();
+            ServerConnection.TcpVideoListener = new(IPAddress.Any, VideoPort);
+            ServerConnection.TcpVideoListener.Start();
             LocalMessageEvent("Server started!");
         }
 
@@ -269,7 +269,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                 StartServer();
 
-                await LocalMessageEvent($"Listening on port {VideoPort}.");
+                await LocalMessageEvent($"Listening on video port {VideoPort} and message port {MessagePort}.");
 
                 await LocalMessageEvent("Retreiving external IP...");
 
@@ -318,10 +318,11 @@ namespace PROG280__Remote_Access_App_Client__
         private async Task Listen()
         {
             await LocalMessageEvent("Listening...");
-            ServerConnection!.TcpVideoClient = await ServerConnection!.TcpListener!.AcceptTcpClientAsync();
+            ServerConnection!.TcpVideoClient = await ServerConnection!.TcpVideoListener!.AcceptTcpClientAsync();
+            await ServerConnection!.InitializeMessaging(ServerConnection.TcpVideoClient.Client.RemoteEndPoint!.ToString()!, MessagePort);
             await LocalMessageEvent($"Connection Established with {ServerConnection!.TcpVideoClient.Client.RemoteEndPoint}.");
             ServerConnection!.IsConnected = true;
-            _messagingWindow = new MessagingWindow();
+            _messagingWindow = new MessagingWindow(ServerConnection);
             _messagingWindow.Show();
         }
 
@@ -333,6 +334,7 @@ namespace PROG280__Remote_Access_App_Client__
             try
             {
                 ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, VideoPort);
+                ClientConnection!.InitializeMessaging(RemoteIPAddress, MessagePort);
             }
             catch
             {

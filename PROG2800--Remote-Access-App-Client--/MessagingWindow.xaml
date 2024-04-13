@@ -26,7 +26,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ListBox ItemsSource="{Binding Path=Messages}" Grid.ColumnSpan="12"></ListBox>
+        <ListBox ItemsSource="{Binding Path=ChatMessages}" Grid.ColumnSpan="12"></ListBox>
 
         <TextBox x:Name="txtMessage"  Grid.Row="1" Grid.ColumnSpan="5" VerticalContentAlignment="Center" Height="50"></TextBox>
 
