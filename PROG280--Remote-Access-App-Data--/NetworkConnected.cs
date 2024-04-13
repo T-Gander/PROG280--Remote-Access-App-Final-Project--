@@ -19,6 +19,7 @@ using System.Runtime.CompilerServices;
 using System.Net.Http;
 using System.ComponentModel;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace PROG280__Remote_Access_App_Data__
 {
@@ -144,7 +145,13 @@ namespace PROG280__Remote_Access_App_Data__
 
         private void HandleChatMessages(string message)
         {
-            ChatMessages.Add($"{DisplayName}: {message}");
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // Perform UI-related operations inside this block
+                // For example, adding items to a collection bound to a UI control
+                ChatMessages.Add($"{DisplayName}: {message}");
+            });
+            
         }
 
         public Bitmap GrabScreen()
