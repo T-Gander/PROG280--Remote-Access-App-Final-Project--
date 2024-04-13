@@ -26,35 +26,12 @@ namespace PROG2800__Remote_Access_App_Client__
     /// </summary>
     public partial class RemoteWindow : Window
     {
-        private RemoteWindowDataContext _RemoteWindowDataContext;
 
-        public RemoteWindow(string ip)
+        public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
-            _RemoteWindowDataContext = new(ip);
-            DataContext = _RemoteWindowDataContext;
-            Task.Run(HandleVideoPackets);
+            DataContext = client;
             //Open a messaging window.
         }
-
-        private async void HandleVideoPackets()
-        {
-            try
-            {
-                while(true)
-                {
-                    await Dispatcher.Invoke(async () =>
-                    {
-                        _RemoteWindowDataContext.Frame = await ServerWindow.ClientConnection!.ReceiveVideoPackets();
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                //Something bad happened
-            }
-        }
-
-        
     }
 }

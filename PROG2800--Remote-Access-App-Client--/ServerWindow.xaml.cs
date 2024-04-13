@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using PROG2800__Remote_Access_App_Client__;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
+using static PROG280__Remote_Access_App_Data__.Packet;
 
 namespace PROG280__Remote_Access_App_Client__
 {
@@ -39,8 +40,7 @@ namespace PROG280__Remote_Access_App_Client__
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public static Client? ClientConnection;
-        public static Server? ServerConnection;
+        public static NetworkConnected? Client;
         private LogsWindow _logWindow;
 
         public string LocalIPAddress
@@ -50,67 +50,31 @@ namespace PROG280__Remote_Access_App_Client__
                 return RetreiveLocalIP().Result;
             }
         }
-        public int VideoPort
+        public int Port
         {
             get
             {
-                return int.Parse(_videoPort);
+                return int.Parse(_port);
             }
             set
             {
                 if (int.TryParse(value.ToString(), out int result))
                 {
-                    _videoPort = result.ToString();
+                    _port = result.ToString();
                 }
                 else
                 {
-                    _videoPort = "9000";
+                    _port = "9000";
                 }
-                OnPropertyChanged(nameof(VideoPort));
+                OnPropertyChanged(nameof(Port));
             }
         }
 
-        private string _videoPort = "9000";
+        private string _port = "9000";
 
-        public int MessagePort
-        {
-            get
-            {
-                return int.Parse(_messagePort);
-            }
-            set
-            {
-                if (int.TryParse(value.ToString(), out int result))
-                {
-                    _messagePort = result.ToString();
-                }
-                else
-                {
-                    _messagePort = "9000";
-                }
-                OnPropertyChanged(nameof(VideoPort));
-            }
-        }
-
-        private string _messagePort = "9001";
-
-        public string RemoteIPAddress
-        {
-            get
-            {
-                return _remoteIPAddress;
-            }
-            set
-            {
-                _remoteIPAddress = value;
-                OnPropertyChanged(nameof(RemoteIPAddress));
-            }
-        }
-
-        private string _remoteIPAddress = "";
+        public string RemoteIPAddress { get; set; }
 
         public delegate Task LocalMessageDelegate(string message);
-        public delegate void PacketDelegate(Packet packet);
         public event LocalMessageDelegate LocalMessageEvent;
 
         public ServerWindow()
@@ -140,7 +104,7 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async void StopServer()
         {
-            ServerConnection!.ShutDown();
+            //Client!.ShutDown();
             await LocalMessageEvent?.Invoke("Stopping server...")!;
             ChangeServerState();
         }
@@ -157,16 +121,15 @@ namespace PROG280__Remote_Access_App_Client__
 
         private void StartServer()
         {
-            ServerConnection = new();
+            Client = new();
 
             btnRequestConnection.IsEnabled = false;
             txtServerIp.IsEnabled = false;
 
             LocalMessageEvent("Starting server...");
-            ServerConnection.TcpVideoListener = new(IPAddress.Any, VideoPort);
-            ServerConnection.TcpVideoListener.Start();
-            ServerConnection.TcpMessageListener = new(IPAddress.Any, MessagePort);
-            ServerConnection.TcpMessageListener.Start();
+            Client!.TcpListenerData = new(IPAddress.Any, Port);
+            Client.TcpListenerData.Start();
+            
             LocalMessageEvent("Server started!");
         }
 
@@ -271,7 +234,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                 StartServer();
 
-                await LocalMessageEvent($"Listening on video port {VideoPort} and message port {MessagePort}.");
+                await LocalMessageEvent($"Listening on port {Port}.");
 
                 await LocalMessageEvent("Retreiving external IP...");
 
@@ -298,7 +261,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                 while (true)
                 {
-                    if (!ServerConnection!.IsConnected)
+                    if (!Client!.IsConnected)
                     {
                         await LocalMessageEvent("Lost Connection to Remote Client.");
                         await LocalMessageEvent("Listening...");
@@ -306,13 +269,14 @@ namespace PROG280__Remote_Access_App_Client__
                     }
                     else
                     {
-                        await ServerConnection!.SendVideoPackets();
+                        await Client!.SendPacket(MessageType.FrameChunk, Client!.GrabScreen());
                     }
                     await Task.Delay((int)FrameRate.Thirty); //Tied to fps
                 }
             }
             catch (Exception ex)
             {
+                await LocalMessageEvent(ex.Message);
                 await LocalMessageEvent($"TCP Listener Closed.");
             }
         }
@@ -320,24 +284,22 @@ namespace PROG280__Remote_Access_App_Client__
         private async Task Listen()
         {
             await LocalMessageEvent("Listening...");
-            ServerConnection!.TcpVideoClient = await ServerConnection!.TcpVideoListener!.AcceptTcpClientAsync();
-            ServerConnection!.TcpMessageClient = await ServerConnection!.TcpMessageListener!.AcceptTcpClientAsync();
+            Client!.TcpClientData = await Client!.TcpListenerData!.AcceptTcpClientAsync();
 
-            await LocalMessageEvent($"Connection Established with {ServerConnection!.TcpVideoClient.Client.RemoteEndPoint}.");
-            ServerConnection!.IsConnected = true;
-            _messagingWindow = new MessagingWindow(ServerConnection);
+            await LocalMessageEvent($"Connection Established with {Client!.TcpClientData.Client.RemoteEndPoint}.");
+            Client!.IsConnected = true;
+            _messagingWindow = new MessagingWindow(Client);
             _messagingWindow.Show();
         }
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
-            ClientConnection = new();
+            Client = new();
             await LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
 
             try
             {
-                ClientConnection!.TcpVideoClient = new TcpClient(RemoteIPAddress, VideoPort);
-                ClientConnection!.TcpMessageClient = new TcpClient(RemoteIPAddress, MessagePort);
+                Client!.TcpClientData = new TcpClient(RemoteIPAddress, Port);
             }
             catch
             {
@@ -345,7 +307,7 @@ namespace PROG280__Remote_Access_App_Client__
                 return;
             }
 
-            ClientConnection!.IsConnected = true;
+            Client!.IsConnected = true;
 
             await LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
@@ -358,11 +320,11 @@ namespace PROG280__Remote_Access_App_Client__
                 tcs.TrySetResult(null); // Signal that the task is completed
             }
 
-            RemoteWindow _remoteWindow = new(RemoteIPAddress);
+            RemoteWindow _remoteWindow = new(Client);
             _remoteWindow.Closed += RemoteWindow_Closed;
             _remoteWindow.Show();
 
-            _messagingWindow = new MessagingWindow(ClientConnection);
+            _messagingWindow = new MessagingWindow(Client);
             _messagingWindow.Show();
 
             // Wait asynchronously for the RemoteWindow to be closed
@@ -373,14 +335,8 @@ namespace PROG280__Remote_Access_App_Client__
                 _messagingWindow.Close();
             }
 
-            ClientConnection.CloseConnections();
+            Client.CloseConnections();
             await LocalMessageEvent("Connection closed.");
-        }
-
-        private void btnSettings_Click(object sender, RoutedEventArgs e)
-        {
-            SettingsWindow settingsWindow = new SettingsWindow(this);
-            settingsWindow.ShowDialog();
         }
     }
 }

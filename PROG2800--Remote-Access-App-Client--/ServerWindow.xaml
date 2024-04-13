@@ -43,6 +43,5 @@
         <TextBlock TextWrapping="Wrap" x:Name="lblAppStatus" Margin="10,0,0,0" Grid.Row="3" Grid.RowSpan="3" Grid.ColumnSpan="12" FontSize="20">Waiting for Action...</TextBlock>
 
         <Button x:Name="btnLogs" Grid.Row="6" Grid.Column="10" Height="30" Grid.ColumnSpan="2" Click="btnLogs_Click">Logs</Button>
-        <Button x:Name="btnSettings" Grid.Row="6" Height="30" Grid.ColumnSpan="2" Click="btnSettings_Click">Settings</Button>
     </Grid>
 </Window>

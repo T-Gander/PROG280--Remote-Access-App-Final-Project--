@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PROG2800__Remote_Access_App_Client__"
         mc:Ignorable="d"
-        Title="{Binding Path=RemoteIP}" Height="800" Width="1200">
+        Title="" Height="800" Width="1200">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -24,6 +24,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="10*"/>
         </Grid.RowDefinitions>
-        <Image Grid.ColumnSpan="12" Grid.RowSpan="2" Source="{Binding Path=Frame}"></Image>
+        <Image Grid.ColumnSpan="12" Grid.RowSpan="2" Source="{Binding Path=CurrentFrame}"></Image>
     </Grid>
 </Window>
