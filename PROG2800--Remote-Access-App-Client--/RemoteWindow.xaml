@@ -24,6 +24,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="10*"/>
         </Grid.RowDefinitions>
-        <Image Grid.ColumnSpan="12" Grid.RowSpan="2" Source="{Binding}"></Image>
+        <Image Grid.ColumnSpan="12" Grid.RowSpan="2" Source="{Binding Path=Frame}"></Image>
     </Grid>
 </Window>
