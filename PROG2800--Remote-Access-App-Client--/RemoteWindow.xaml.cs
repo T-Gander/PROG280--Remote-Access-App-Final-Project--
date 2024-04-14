@@ -30,6 +30,7 @@ namespace PROG2800__Remote_Access_App_Client__
         {
             InitializeComponent();
             DataContext = client;
+            Task.Run(client.ReceivePackets);
             //Open a messaging window.
         }
     }
