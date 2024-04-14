@@ -31,8 +31,8 @@ namespace PROG280__Remote_Access_App_Data__
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public delegate void FrameDelegate();
-        public event FrameDelegate FrameHandler;
+        public delegate void FrameDelegate(BitmapImage frame);
+        public static event FrameDelegate? FrameHandler;
 
         public delegate void ChunkDelegate(byte[] data);
         public event ChunkDelegate ChunkHandler;
@@ -138,11 +138,6 @@ namespace PROG280__Remote_Access_App_Data__
             frameChunks.AddRange(chunk);
         }
 
-        private void HandleFrames()
-        {
-            RemoteWindow.UpdateFrame();
-        }
-
         private void HandleChatMessages(string message)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -179,6 +174,14 @@ namespace PROG280__Remote_Access_App_Data__
             Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(filePacket)).CopyTo(fileBytes, 0);
 
             await _dataStream.WriteAsync(fileBytes, 0, fileBytes.Length);
+        }
+
+        private void HandleFrames(BitmapImage frame)
+        {
+            if(FrameHandler != null)
+            {
+                FrameHandler.Invoke(frame);
+            }
         }
 
         public async Task ReceivePackets()
@@ -219,8 +222,9 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
                             }
-                            CurrentFrame = frame;
-                            FrameHandler();
+                            //CurrentFrame = frame;
+
+                            FrameHandler(frame);
                             break;
 
                         case MessageType.Message:
