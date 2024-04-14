@@ -29,7 +29,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             InitializeComponent();
             DataContext = client;
-            //Task.Run(client.ReceivePackets);
+            Task.Run(client.ReceiveDataPackets);
             //AskForDisplayName();
         }
 
@@ -90,7 +90,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             NetworkConnected client = (NetworkConnected)DataContext;
             client.ChatMessages.Add($"{client.DisplayName}: {txtMessage.Text}");
-            await client.SendPacket(MessageType.Message, txtMessage.Text);
+            await client.SendDataPacket(MessageType.Message, txtMessage.Text);
             txtMessage.Text = "";
         }
     }

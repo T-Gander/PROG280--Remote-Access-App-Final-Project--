@@ -31,59 +31,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             InitializeComponent();
             DataContext = this;
-            //Task.Run(TestVideo);
-            Task.Run(async () =>
-            {
-                while (true)
-                {
-                    BitmapImage? frame = await InitializeFrame();
-
-                    if (frame != null)
-                    {
-                        Frame = frame;
-                    }
-
-                    client.FrameReady = false;
-                }
-            });
-        }
-
-        private async Task<BitmapImage?> InitializeFrame()
-        {
-            NetworkConnected client = (NetworkConnected)DataContext;
-
-            var ready = await client.IsFrameReady();
-                
-            if(ready)
-            {
-                byte[] bitmapBytes = client.FrameChunks.ToArray();
-                client.FrameChunks.Clear();
-
-                BitmapImage? frame;
-
-                using (MemoryStream mstream = new(bitmapBytes))
-                {
-                    frame = new BitmapImage();
-                    frame.BeginInit();
-                    frame.StreamSource = mstream;
-                    frame.CacheOption = BitmapCacheOption.OnLoad;
-                    frame.EndInit();
-                }
-                return frame;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public static readonly DependencyProperty FrameProperty =
-            DependencyProperty.Register("Frame", typeof(BitmapImage), typeof(RemoteWindow));
-
-        public BitmapImage Frame
-        {
-            get { return (BitmapImage)GetValue(FrameProperty); }
-            set { SetValue(FrameProperty, value); }
+            Task.Run(client.ReceiveVideoPackets);
         }
     }
 }

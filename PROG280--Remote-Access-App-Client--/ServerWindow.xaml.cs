@@ -285,11 +285,11 @@ namespace PROG280__Remote_Access_App_Client__
                             Buffer.BlockCopy(imageData, offset, chunk, 0, length);
 
                             // Serialize packet and send
-                            await Client!.SendPacket(MessageType.FrameChunk, chunk);
+                            await Client!.SendVideoPacket(MessageType.FrameChunk, chunk);
                             chunkIndex++;
                         }
 
-                        await Client!.SendPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
+                        await Client!.SendVideoPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
                         i++;
                     }
                     await Task.Delay(1000); //Tied to fps
@@ -306,6 +306,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             await LocalMessageEvent("Listening...");
             Client!.TcpClientData = await Client!.TcpListenerData!.AcceptTcpClientAsync();
+            Client!.TcpClientVideo = await Client!.TcpListenerVideo!.AcceptTcpClientAsync();
 
             await LocalMessageEvent($"Connection Established with {Client!.TcpClientData.Client.RemoteEndPoint}.");
             Client!.IsConnected = true;
@@ -321,6 +322,7 @@ namespace PROG280__Remote_Access_App_Client__
             try
             {
                 Client!.TcpClientData = new TcpClient(RemoteIPAddress, Port);
+                Client!.TcpClientVideo = new TcpClient(RemoteIPAddress, Port + 1);
             }
             catch
             {

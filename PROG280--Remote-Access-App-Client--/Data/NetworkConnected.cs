@@ -55,7 +55,7 @@ namespace PROG280__Remote_Access_App_Data__
             FrameHandler += HandleFrames;
         }
 
-        public List<byte> FrameChunks = new List<byte>();
+        private List<byte> frameChunks = new List<byte>();
 
         private List<byte> fileChunks = new List<byte>();
 
@@ -67,9 +67,15 @@ namespace PROG280__Remote_Access_App_Data__
         public string? DisplayName { get; set; } = "Lazy User";
 
         public TcpListener? TcpListenerData { get; set; }
+        public TcpListener? TcpListenerVideo { get; set; }
+
         public TcpClient? TcpClientData { get; set; }
 
+        public TcpClient? TcpClientVideo { get; set; }
+
         protected NetworkStream? _dataStream { get; set; }
+
+        protected NetworkStream? _videoStream { get; set; }
 
         public ObservableCollection<string> LogMessages { get; set; } = new();
 
@@ -124,7 +130,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         private void HandleFrameChunks(byte[] chunk)
         {
-            FrameChunks.AddRange(chunk);
+            frameChunks.AddRange(chunk);
         }
 
         private void HandleChatMessages(string message)
@@ -146,7 +152,7 @@ namespace PROG280__Remote_Access_App_Data__
                     // Perform UI-related operations inside this block
                     // For example, adding items to a collection bound to a UI control
                     //CurrentFrame = frame;
-                    RemoteWindow.Frame = frame;
+                    CurrentFrame = frame;
                 });
             }
         }
@@ -162,7 +168,7 @@ namespace PROG280__Remote_Access_App_Data__
             return screenshot;
         }
 
-        public async Task SendPacket<T>(MessageType messageType, T data)
+        public async Task SendDataPacket<T>(MessageType messageType, T data)
         {
             _dataStream = TcpClientData!.GetStream();
 
@@ -179,16 +185,33 @@ namespace PROG280__Remote_Access_App_Data__
             await _dataStream.WriteAsync(fileBytes, 0, fileBytes.Length);
         }
 
-        public async Task ReceivePackets(Action<BitmapImage> frameHandler)
+        public async Task SendVideoPacket<T>(MessageType messageType, T data)
+        {
+            _videoStream = TcpClientVideo!.GetStream();
+
+            byte[] fileBytes = new byte[PacketSize];
+
+            Packet filePacket = new Packet()
+            {
+                ContentType = messageType,
+                Payload = JsonConvert.SerializeObject(data)
+            };
+
+            Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(filePacket)).CopyTo(fileBytes, 0);
+
+            await _videoStream.WriteAsync(fileBytes, 0, fileBytes.Length);
+        }
+
+        public async Task ReceiveVideoPackets()
         {
             try
             {
                 while (true)
                 {
-                    _dataStream = TcpClientData!.GetStream();
+                    _videoStream = TcpClientVideo!.GetStream();
 
                     byte[] buffer = new byte[PacketSize];
-                    int bytesRead = await _dataStream!.ReadAsync(buffer, 0, buffer.Length);
+                    int bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
                     var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;
 
@@ -210,29 +233,50 @@ namespace PROG280__Remote_Access_App_Data__
                             break;
 
                         case MessageType.FrameEnd:
-                            //byte[] bitmapBytes = frameChunks.ToArray();
-                            //frameChunks.Clear();
-                            //BitmapImage? frame = new();
+                            byte[] bitmapBytes = frameChunks.ToArray();
+                            frameChunks.Clear();
+                            BitmapImage? frame = new();
 
-                            //await Task.Run(() =>
-                            //{
-                            //    using (MemoryStream mstream = new(bitmapBytes))
-                            //    {
-                            //        frame = new BitmapImage();
-                            //        frame.BeginInit();
-                            //        frame.StreamSource = mstream;
-                            //        frame.CacheOption = BitmapCacheOption.OnLoad;
-                            //        frame.EndInit();
-                            //    }
-                            //});
+                            using (MemoryStream mstream = new(bitmapBytes))
+                            {
+                                frame = new BitmapImage();
+                                frame.BeginInit();
+                                frame.StreamSource = mstream;
+                                frame.CacheOption = BitmapCacheOption.OnLoad;
+                                frame.EndInit();
+                            }
 
-                            //Application.Current.Dispatcher.Invoke(() =>
-                            //{
-                            //    frameHandler(frame);
-                            //});
-                            FrameReady = true;
+                            FrameHandler(frame);
                             break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
 
+            }
+        }
+
+        public async Task ReceiveDataPackets()
+        {
+            try
+            {
+                while (true)
+                {
+                    _dataStream = TcpClientData!.GetStream();
+
+                    byte[] buffer = new byte[PacketSize];
+                    int bytesRead = await _dataStream!.ReadAsync(buffer, 0, buffer.Length);
+                    var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;
+
+                    if (packet == null)
+                    {
+                        return;
+                    }
+
+                    switch (packet.ContentType)
+                    {
                         case MessageType.Message:
                             string message = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
                             ChatHandler(message);
@@ -264,18 +308,6 @@ namespace PROG280__Remote_Access_App_Data__
             {
 
             }
-        }
-
-        public async Task<bool> IsFrameReady()
-        {
-            for(int i = 0; i< 10; i++)
-            {
-                if(FrameReady != true)
-                {
-                    await Task.Delay(10);
-                }
-            }
-            return FrameReady;
         }
     }
 }
