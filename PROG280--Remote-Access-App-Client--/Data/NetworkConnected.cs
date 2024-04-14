@@ -42,10 +42,10 @@ namespace PROG280__Remote_Access_App_Data__
         public delegate void ChatDelegate(string message);
         public event ChatDelegate ChatHandler;
 
-        bool test = false;
-
         public bool ReceivingFile = false;
         public string ReceivingFileName = "";
+
+        public bool FrameReady = false;
 
         public NetworkConnected()
         {
@@ -55,7 +55,7 @@ namespace PROG280__Remote_Access_App_Data__
             FrameHandler += HandleFrames;
         }
 
-        private List<byte> frameChunks = new List<byte>();
+        public List<byte> FrameChunks = new List<byte>();
 
         private List<byte> fileChunks = new List<byte>();
 
@@ -124,7 +124,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         private void HandleFrameChunks(byte[] chunk)
         {
-            frameChunks.AddRange(chunk);
+            FrameChunks.AddRange(chunk);
         }
 
         private void HandleChatMessages(string message)
@@ -200,31 +200,37 @@ namespace PROG280__Remote_Access_App_Data__
                     switch (packet.ContentType)
                     {
                         case MessageType.FrameChunk:
+                            while (FrameReady)
+                            {
+                                await Task.Delay(1000);
+                            }
+
                             byte[] chunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
                             ChunkHandler(chunk);
                             break;
 
                         case MessageType.FrameEnd:
-                            byte[] bitmapBytes = frameChunks.ToArray();
-                            frameChunks.Clear();
-                            BitmapImage? frame = new();
+                            //byte[] bitmapBytes = frameChunks.ToArray();
+                            //frameChunks.Clear();
+                            //BitmapImage? frame = new();
 
-                            await Task.Run(() =>
-                            {
-                                using (MemoryStream mstream = new(bitmapBytes))
-                                {
-                                    frame = new BitmapImage();
-                                    frame.BeginInit();
-                                    frame.StreamSource = mstream;
-                                    frame.CacheOption = BitmapCacheOption.OnLoad;
-                                    frame.EndInit();
-                                }
-                            });
+                            //await Task.Run(() =>
+                            //{
+                            //    using (MemoryStream mstream = new(bitmapBytes))
+                            //    {
+                            //        frame = new BitmapImage();
+                            //        frame.BeginInit();
+                            //        frame.StreamSource = mstream;
+                            //        frame.CacheOption = BitmapCacheOption.OnLoad;
+                            //        frame.EndInit();
+                            //    }
+                            //});
 
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                frameHandler(frame);
-                            });
+                            //Application.Current.Dispatcher.Invoke(() =>
+                            //{
+                            //    frameHandler(frame);
+                            //});
+                            FrameReady = true;
                             break;
 
                         case MessageType.Message:
@@ -258,6 +264,18 @@ namespace PROG280__Remote_Access_App_Data__
             {
 
             }
+        }
+
+        public async Task<bool> IsFrameReady()
+        {
+            for(int i = 0; i< 10; i++)
+            {
+                if(FrameReady != true)
+                {
+                    await Task.Delay(10);
+                }
+            }
+            return FrameReady;
         }
     }
 }
