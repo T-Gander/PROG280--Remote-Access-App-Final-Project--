@@ -253,7 +253,8 @@ namespace PROG280__Remote_Access_App_Client__
         {
             try
             {
-                while (true)
+                int i = 0;
+                while (i < 1)
                 {
                     if (!Client!.IsConnected)
                     {
@@ -288,8 +289,8 @@ namespace PROG280__Remote_Access_App_Client__
                         }
 
                         await Client!.SendVideoPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
-                        await Client!.ReceiveFrameAckPacket();
                     }
+                    i++;
                     await Task.Delay(1000); //Tied to fps
                 }
             }

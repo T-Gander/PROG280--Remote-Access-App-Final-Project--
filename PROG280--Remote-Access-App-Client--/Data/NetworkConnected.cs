@@ -255,8 +255,6 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
                             }
-
-                            await SendFrameAckPacket();
                             return frame;
                     }
                 }
@@ -264,38 +262,6 @@ namespace PROG280__Remote_Access_App_Data__
             catch (Exception ex)
             {
                 return null;
-            }
-        }
-
-        public async Task SendFrameAckPacket()
-        {
-            Packet ackPacket = new Packet()
-            {
-                ContentType = MessageType.Acknowledgement
-            };
-
-            byte[] ackBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ackPacket));
-
-            await _videoStream.WriteAsync(ackBytes, 0, ackBytes.Length);
-        }
-
-        public async Task<MessageType> ReceiveFrameAckPacket()
-        {
-            try
-            {
-                byte[] buffer = new byte[PacketSize];
-                int bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
-                var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
-
-                return packet!.ContentType;
-            }
-            catch
-            {
-                LogMessages.Add("Exception: Didn't receive ack packet. And stream is closed.");
-                IsConnected = false;
-
-                return MessageType.Failure;
             }
         }
 
