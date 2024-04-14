@@ -146,25 +146,6 @@ namespace PROG280__Remote_Access_App_Data__
             {
                 CurrentFrame = frame;
             });
-
-            //if (!test)
-            //{
-            //    Bitmap bitmap;
-
-            //    using (MemoryStream memory = new MemoryStream())
-            //    {
-            //        BitmapEncoder encoder = new PngBitmapEncoder();
-            //        encoder.Frames.Add(BitmapFrame.Create(frame));
-            //        encoder.Save(memory);
-
-            //        bitmap = new Bitmap(memory);
-            //    }
-
-            //    bitmap.Save("something.png");
-
-            //    // File.Save("something.png", frame);
-            //    test = true;
-            //}
         }
 
         private void HandleChatMessages(string message)
