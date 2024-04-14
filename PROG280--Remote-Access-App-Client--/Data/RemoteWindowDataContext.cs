@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 
 namespace PROG280__Remote_Access_App_Data__
 {
-    public class RemoteWindowDataContext : System.ComponentModel.INotifyPropertyChanged
+    public class RemoteWindowDataContext : INotifyPropertyChanged
     {
         public RemoteWindowDataContext() 
         {

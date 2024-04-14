@@ -31,17 +31,36 @@ namespace PROG280__Remote_Access_App_Client__
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
-            DataContext = remoteWindowDataContext;
+            DataContext = this;
             client.FrameHandler += UpdateFrame;
             //Open a messaging window.
         }
 
         public void UpdateFrame(BitmapImage frame)
         {
-            Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.Invoke(() =>
             { 
-                remoteWindowDataContext.Frame = frame;
+                Frame = frame;
             });
+        }
+
+        private BitmapImage? _frame;
+
+        public BitmapImage? Frame
+        {
+            get { return _frame; }
+            set
+            {
+                _frame = value;
+                OnPropertyChanged(nameof(Frame));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
