@@ -251,26 +251,5 @@ namespace PROG280__Remote_Access_App_Data__
 
             }
         }
-
-        private Task<BitmapImage?> GetFrame(byte[] bytes)
-        {
-            BitmapImage? frame;
-
-            using (MemoryStream mstream = new(bytes))
-            {
-                frame = new BitmapImage();
-                frame.BeginInit();
-                frame.StreamSource = mstream;
-                frame.CacheOption = BitmapCacheOption.OnLoad;
-                frame.EndInit();
-            }
-
-            return Task.FromResult(frame);
-        }
-
-        public Task<BitmapImage?> RemoteWindow_OnFrameReceiver()
-        {
-            return Task.FromResult(CurrentFrame); 
-        }
     }
 }
