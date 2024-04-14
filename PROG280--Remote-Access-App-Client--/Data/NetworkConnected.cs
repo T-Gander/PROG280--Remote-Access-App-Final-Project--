@@ -179,7 +179,7 @@ namespace PROG280__Remote_Access_App_Data__
             await _dataStream.WriteAsync(fileBytes, 0, fileBytes.Length);
         }
 
-        public async Task ReceivePackets()
+        public async Task ReceivePackets(Action<BitmapImage> frameHandler)
         {
             try
             {
@@ -217,7 +217,11 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
                             }
-                            FrameHandler(frame);
+
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                frameHandler(frame);
+                            });
                             break;
 
                         case MessageType.Message:

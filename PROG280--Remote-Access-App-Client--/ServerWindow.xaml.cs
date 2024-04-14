@@ -309,7 +309,7 @@ namespace PROG280__Remote_Access_App_Client__
 
             await LocalMessageEvent($"Connection Established with {Client!.TcpClientData.Client.RemoteEndPoint}.");
             Client!.IsConnected = true;
-            _messagingWindow = new MessagingWindow(ref Client);
+            _messagingWindow = new MessagingWindow(Client);
             _messagingWindow.Show();
         }
 
@@ -341,12 +341,12 @@ namespace PROG280__Remote_Access_App_Client__
                 tcs.TrySetResult(null); // Signal that the task is completed
             }
 
-            Client.RemoteWindow = new RemoteWindow(ref Client);
+            Client.RemoteWindow = new RemoteWindow(Client);
 
             Client.RemoteWindow.Closed += RemoteWindow_Closed;
             Client.RemoteWindow.Show();
 
-            _messagingWindow = new MessagingWindow(ref Client);
+            _messagingWindow = new MessagingWindow(Client);
             _messagingWindow.Show();
 
             // Wait asynchronously for the RemoteWindow to be closed
@@ -363,7 +363,7 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            RemoteWindow remoteWindow = new RemoteWindow(ref Client);
+            RemoteWindow remoteWindow = new RemoteWindow(Client);
             remoteWindow.Show();
             
         }

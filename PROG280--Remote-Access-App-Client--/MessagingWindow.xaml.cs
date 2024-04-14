@@ -25,7 +25,7 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class MessagingWindow : Window
     {
-        public MessagingWindow(ref NetworkConnected client)
+        public MessagingWindow(NetworkConnected client)
         {
             InitializeComponent();
             DataContext = client;
