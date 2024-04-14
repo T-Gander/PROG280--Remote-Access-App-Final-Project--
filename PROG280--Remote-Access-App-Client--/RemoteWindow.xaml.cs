@@ -25,7 +25,7 @@ namespace PROG280__Remote_Access_App_Client__
     /// <summary>
     /// Interaction logic for RemoteWindow.xaml
     /// </summary>
-    public partial class RemoteWindow : INotifyPropertyChanged
+    public partial class RemoteWindow : Window
     {
         public RemoteWindow(ref NetworkConnected client)
         {
@@ -67,31 +67,31 @@ namespace PROG280__Remote_Access_App_Client__
         //    return Task.FromResult(frame);
         //}
 
-        private BitmapImage? _frame;
+        //private BitmapImage? _frame;
 
-        public BitmapImage? Frame
+        //public BitmapImage? Frame
+        //{
+        //    get 
+        //    { 
+        //        return _frame;
+        //    }
+        //    set
+        //    {
+        //        Application.Current.Dispatcher.Invoke(() =>
+        //        {
+        //            _frame = value;
+        //            OnPropertyChanged(nameof(Frame));
+        //        });
+        //    }
+        //}
+
+        public static readonly DependencyProperty FrameProperty =
+            DependencyProperty.Register("Frame", typeof(BitmapImage), typeof(RemoteWindow));
+
+        public BitmapImage Frame
         {
-            get 
-            { 
-                if(_frame == null)
-                {
-                    return new();
-                }
-
-                return _frame;
-            }
-            set
-            {
-                _frame = value;
-                OnPropertyChanged(nameof(Frame));
-            }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            get { return (BitmapImage)GetValue(FrameProperty); }
+            set { SetValue(FrameProperty, value); }
         }
     }
 }
