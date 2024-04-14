@@ -180,7 +180,7 @@ namespace PROG280__Remote_Access_App_Data__
         {
             if(FrameHandler != null)
             {
-                FrameHandler(frame);
+                FrameHandler.Invoke(frame);
             }
         }
 
