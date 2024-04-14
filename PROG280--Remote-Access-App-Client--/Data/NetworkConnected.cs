@@ -164,7 +164,7 @@ namespace PROG280__Remote_Access_App_Data__
             await _dataStream.WriteAsync(fileBytes, 0, fileBytes.Length);
         }
 
-        private void HandleFrames(BitmapImage? frame)
+        private async Task HandleFrames(BitmapImage? frame)
         {
             CurrentFrame = frame;
 
@@ -172,6 +172,8 @@ namespace PROG280__Remote_Access_App_Data__
             {
                 FrameHandler.Invoke(frame);
             }
+
+            await Task.Delay(1000);
         }
 
         public async Task ReceivePackets()
@@ -212,7 +214,7 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
                             }
-                            HandleFrames(frame);
+                            await HandleFrames(frame);
                             break;
 
                         case MessageType.Message:
