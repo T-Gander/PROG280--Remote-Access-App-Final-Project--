@@ -27,11 +27,51 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class RemoteWindow : Window
     {
+        private NetworkConnected _Client;
+
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
-            DataContext = client;
-            Task.Run(client.ReceiveVideoPackets);
+            DataContext = this;
+            _Client = client;
+            Task.Run(HandlePackets);
+        }
+
+        private BitmapImage? _frame;
+
+        public BitmapImage? Frame
+        {
+            get { return _frame; }
+            set
+            {
+                _frame = value;
+                OnPropertyChanged(nameof(Frame));
+            }
+        }
+
+        private async void HandlePackets()
+        {
+            try
+            {
+                while (true)
+                {
+                    await Dispatcher.Invoke(async () =>
+                    {
+                        Frame = await _Client.ReceiveVideoPackets();
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                //Something bad happened
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

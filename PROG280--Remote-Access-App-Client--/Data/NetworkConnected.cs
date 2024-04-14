@@ -95,8 +95,11 @@ namespace PROG280__Remote_Access_App_Data__
             }
             set
             {
-                _frame = value;
-                OnPropertyChanged(nameof(CurrentFrame));
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _frame = value;
+                    OnPropertyChanged(nameof(CurrentFrame));
+                });
             }
         }
 
@@ -219,7 +222,7 @@ namespace PROG280__Remote_Access_App_Data__
             await _videoStream.WriteAsync(fileBytes, 0, fileBytes.Length);
         }
 
-        public async Task ReceiveVideoPackets()
+        public async Task<BitmapImage?> ReceiveVideoPackets()
         {
             try
             {
@@ -231,11 +234,6 @@ namespace PROG280__Remote_Access_App_Data__
                     int bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
                     var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;
-
-                    if (packet == null)
-                    {
-                        return;
-                    }
 
                     switch (packet.ContentType)
                     {
@@ -257,15 +255,13 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
                             }
-
-                            FrameHandler(frame);
-                            break;
+                            return frame;
                     }
                 }
             }
             catch (Exception ex)
             {
-
+                return null;
             }
         }
 
@@ -326,5 +322,7 @@ namespace PROG280__Remote_Access_App_Data__
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        
     }
 }
