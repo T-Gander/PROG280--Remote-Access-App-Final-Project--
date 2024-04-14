@@ -28,20 +28,6 @@ namespace PROG280__Remote_Access_App_Client__
     {
         RemoteWindowDataContext remoteWindowDataContext = new();
 
-        public BitmapImage? Frame 
-        { 
-            get 
-            { 
-                return _frame; 
-            }
-            set
-            {
-                _frame = value;
-                OnPropertyChanged(nameof(Frame));
-            }
-        }
-        private BitmapImage? _frame;
-
         public RemoteWindow()
         {
             InitializeComponent();
@@ -54,17 +40,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Frame = frame;
-            });
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                remoteWindowDataContext.Frame = frame;
             });
         }
     }
