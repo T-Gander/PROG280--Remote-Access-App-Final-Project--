@@ -140,10 +140,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         private void HandleFrames(BitmapImage? frame)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                RemoteWindow.UpdateFrame(frame);
-            });
+            RemoteWindow.UpdateFrame();
         }
 
         private void HandleChatMessages(string message)

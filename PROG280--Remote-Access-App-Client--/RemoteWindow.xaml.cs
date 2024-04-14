@@ -48,12 +48,17 @@ namespace PROG280__Remote_Access_App_Client__
             //Open a messaging window.
         }
 
-        public void UpdateFrame(BitmapImage? frame)
+        public void UpdateFrame()
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            if(NetworkConnected.CurrentFrame != null)
             {
-                Frame = frame;
-            });
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    BitmapImage newimage = new BitmapImage();
+                    newimage = NetworkConnected.CurrentFrame;
+                    Frame = newimage;
+                });
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
