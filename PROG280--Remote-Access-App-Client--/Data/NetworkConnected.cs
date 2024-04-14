@@ -35,7 +35,7 @@ namespace PROG280__Remote_Access_App_Data__
         public delegate void FrameDelegate(BitmapImage frame);
         public event FrameDelegate? FrameHandler;
 
-        public delegate void ChunkDelegate(byte[] data);
+        public delegate Task ChunkDelegate(byte[] data);
         public event ChunkDelegate ChunkHandler;
         public event ChunkDelegate FileChunkHandler;
 
@@ -52,7 +52,6 @@ namespace PROG280__Remote_Access_App_Data__
             ChunkHandler += HandleFrameChunks;
             FileChunkHandler += HandleFileChunks;
             ChatHandler += HandleChatMessages;
-            FrameHandler += HandleFrames;
         }
 
         private List<byte> frameChunks = new List<byte>();
@@ -143,12 +142,12 @@ namespace PROG280__Remote_Access_App_Data__
             await stream.WriteAsync(ackBytes, 0, ackBytes.Length);
         }
 
-        private void HandleFileChunks(byte[] chunk)
+        private async Task HandleFileChunks(byte[] chunk)
         {
             fileChunks.AddRange(chunk);
         }
 
-        private void HandleFrameChunks(byte[] chunk)
+        private async Task HandleFrameChunks(byte[] chunk)
         {
             frameChunks.AddRange(chunk);
         }
@@ -161,20 +160,6 @@ namespace PROG280__Remote_Access_App_Data__
                 // For example, adding items to a collection bound to a UI control
                 ChatMessages.Add($"{DisplayName}: {message}");
             });
-        }
-
-        private void HandleFrames(BitmapImage? frame)
-        {
-            if(frame != null)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    // Perform UI-related operations inside this block
-                    // For example, adding items to a collection bound to a UI control
-                    //CurrentFrame = frame;
-                    CurrentFrame = frame;
-                });
-            }
         }
 
         public Bitmap GrabScreen()
@@ -239,7 +224,7 @@ namespace PROG280__Remote_Access_App_Data__
                     {
                         case MessageType.FrameChunk:
                             byte[] chunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
-                            ChunkHandler(chunk);
+                            await ChunkHandler(chunk);
                             break;
 
                         case MessageType.FrameEnd:
