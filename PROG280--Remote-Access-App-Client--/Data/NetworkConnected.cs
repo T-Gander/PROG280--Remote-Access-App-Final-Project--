@@ -35,7 +35,7 @@ namespace PROG280__Remote_Access_App_Data__
         public delegate void FrameDelegate(BitmapImage frame);
         public event FrameDelegate? FrameHandler;
 
-        public delegate Task ChunkDelegate(byte[] data);
+        public delegate void ChunkDelegate(byte[] data);
         public event ChunkDelegate ChunkHandler;
         public event ChunkDelegate FileChunkHandler;
 
@@ -52,6 +52,7 @@ namespace PROG280__Remote_Access_App_Data__
             ChunkHandler += HandleFrameChunks;
             FileChunkHandler += HandleFileChunks;
             ChatHandler += HandleChatMessages;
+            FrameHandler += HandleFrames;
         }
 
         private List<byte> frameChunks = new List<byte>();
@@ -142,12 +143,12 @@ namespace PROG280__Remote_Access_App_Data__
             await stream.WriteAsync(ackBytes, 0, ackBytes.Length);
         }
 
-        private async Task HandleFileChunks(byte[] chunk)
+        private void HandleFileChunks(byte[] chunk)
         {
             fileChunks.AddRange(chunk);
         }
 
-        private async Task HandleFrameChunks(byte[] chunk)
+        private void HandleFrameChunks(byte[] chunk)
         {
             frameChunks.AddRange(chunk);
         }
@@ -160,6 +161,20 @@ namespace PROG280__Remote_Access_App_Data__
                 // For example, adding items to a collection bound to a UI control
                 ChatMessages.Add($"{DisplayName}: {message}");
             });
+        }
+
+        private void HandleFrames(BitmapImage? frame)
+        {
+            if(frame != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // Perform UI-related operations inside this block
+                    // For example, adding items to a collection bound to a UI control
+                    //CurrentFrame = frame;
+                    CurrentFrame = frame;
+                });
+            }
         }
 
         public Bitmap GrabScreen()
@@ -224,24 +239,24 @@ namespace PROG280__Remote_Access_App_Data__
                     {
                         case MessageType.FrameChunk:
                             byte[] chunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
-                            await ChunkHandler(chunk);
+                            ChunkHandler(chunk);
                             break;
 
                         case MessageType.FrameEnd:
-                            byte[] bitmapBytes = await Task.FromResult(frameChunks.ToArray());
+                            byte[] bitmapBytes = frameChunks.ToArray();
                             frameChunks.Clear();
-                            BitmapImage? frame = await Task.Run(() =>
+                            BitmapImage? frame = new();
+
+                            using (MemoryStream mstream = new(bitmapBytes))
                             {
-                                MemoryStream mstream = new(bitmapBytes);
                                 frame = new BitmapImage();
                                 frame.BeginInit();
                                 frame.StreamSource = mstream;
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
-                                mstream.Dispose();
-                                return frame;
-                            });
-                            
+                            }
+
+                            await SendFrameAckPacket();
                             return frame;
                     }
                 }
@@ -249,6 +264,38 @@ namespace PROG280__Remote_Access_App_Data__
             catch (Exception ex)
             {
                 return null;
+            }
+        }
+
+        public async Task SendFrameAckPacket()
+        {
+            Packet ackPacket = new Packet()
+            {
+                ContentType = MessageType.Acknowledgement
+            };
+
+            byte[] ackBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ackPacket));
+
+            await _videoStream.WriteAsync(ackBytes, 0, ackBytes.Length);
+        }
+
+        public async Task<MessageType> ReceiveFrameAckPacket()
+        {
+            try
+            {
+                byte[] buffer = new byte[PacketSize];
+                int bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
+                var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                var packet = JsonConvert.DeserializeObject<Packet>(stringMessage);
+
+                return packet!.ContentType;
+            }
+            catch
+            {
+                LogMessages.Add("Exception: Didn't receive ack packet. And stream is closed.");
+                IsConnected = false;
+
+                return MessageType.Failure;
             }
         }
 

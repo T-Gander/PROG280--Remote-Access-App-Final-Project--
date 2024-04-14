@@ -288,6 +288,7 @@ namespace PROG280__Remote_Access_App_Client__
                         }
 
                         await Client!.SendVideoPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
+                        await Client!.ReceiveFrameAckPacket();
                     }
                     await Task.Delay(1000); //Tied to fps
                 }
