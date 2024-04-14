@@ -63,7 +63,6 @@ namespace PROG280__Remote_Access_App_Data__
         public NetworkConnected()
         {
             ChunkHandler += HandleFrameChunks;
-            FrameHandler += HandleFrames;
             FileChunkHandler += HandleFileChunks;
             ChatHandler += HandleChatMessages;
         }
@@ -224,7 +223,7 @@ namespace PROG280__Remote_Access_App_Data__
                             }
                             //CurrentFrame = frame;
 
-                            FrameHandler(frame);
+                            HandleFrames(frame);
                             break;
 
                         case MessageType.Message:
