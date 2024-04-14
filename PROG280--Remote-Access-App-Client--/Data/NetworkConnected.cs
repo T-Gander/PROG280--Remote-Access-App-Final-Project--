@@ -92,7 +92,7 @@ namespace PROG280__Remote_Access_App_Data__
             set
             {
                 _frame = value;
-                OnPropertyChanged(nameof(Frame));
+                OnPropertyChanged(nameof(CurrentFrame));
             }
         }
 
@@ -236,11 +236,6 @@ namespace PROG280__Remote_Access_App_Data__
                     switch (packet.ContentType)
                     {
                         case MessageType.FrameChunk:
-                            while (FrameReady)
-                            {
-                                await Task.Delay(1000);
-                            }
-
                             byte[] chunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
                             ChunkHandler(chunk);
                             break;
