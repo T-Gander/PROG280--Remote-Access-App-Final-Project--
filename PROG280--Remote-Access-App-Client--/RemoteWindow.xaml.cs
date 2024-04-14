@@ -30,47 +30,44 @@ namespace PROG280__Remote_Access_App_Client__
         public delegate Task<BitmapImage?> FrameReceiver();
         public event FrameReceiver OnFrameReceiver;
 
-        private NetworkConnected _Client { get; set; }
-
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
-            _Client = client;
-            DataContext = this;
-            Task.Run(TestVideo);
+            DataContext = client;
+            //Task.Run(TestVideo);
         }
 
-        private async Task TestVideo()
-        {
-            while (true)
-            {
-                await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveTestFrame());
-                await Task.Delay(30); // Delay between frames
-            }
-        }
+        //private async Task TestVideo()
+        //{
+        //    while (true)
+        //    {
+        //        await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveTestFrame());
+        //        await Task.Delay(30); // Delay between frames
+        //    }
+        //}
 
-        private Task<BitmapImage?> RetreiveTestFrame()
-        {
-            byte[] imageData;
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                _Client!.GrabScreen().Save(memoryStream, ImageFormat.Png); // Save the bitmap to the memory stream as PNG format
-                imageData = memoryStream.ToArray(); // Get the byte array from the memory stream
-            }
+        //private Task<BitmapImage?> RetreiveTestFrame()
+        //{
+        //    byte[] imageData;
+        //    using (MemoryStream memoryStream = new MemoryStream())
+        //    {
+        //        _Client!.GrabScreen().Save(memoryStream, ImageFormat.Png); // Save the bitmap to the memory stream as PNG format
+        //        imageData = memoryStream.ToArray(); // Get the byte array from the memory stream
+        //    }
 
-            BitmapImage? frame;
+        //    BitmapImage? frame;
 
-            using (MemoryStream mstream = new(imageData))
-            {
-                frame = new BitmapImage();
-                frame.BeginInit();
-                frame.StreamSource = mstream;
-                frame.CacheOption = BitmapCacheOption.OnLoad;
-                frame.EndInit();
-            }
+        //    using (MemoryStream mstream = new(imageData))
+        //    {
+        //        frame = new BitmapImage();
+        //        frame.BeginInit();
+        //        frame.StreamSource = mstream;
+        //        frame.CacheOption = BitmapCacheOption.OnLoad;
+        //        frame.EndInit();
+        //    }
 
-            return Task.FromResult(frame);
-        }
+        //    return Task.FromResult(frame);
+        //}
 
         private BitmapImage? _frame;
 

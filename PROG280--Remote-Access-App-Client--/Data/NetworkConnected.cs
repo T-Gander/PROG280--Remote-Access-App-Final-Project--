@@ -52,6 +52,7 @@ namespace PROG280__Remote_Access_App_Data__
             ChunkHandler += HandleFrameChunks;
             FileChunkHandler += HandleFileChunks;
             ChatHandler += HandleChatMessages;
+            FrameHandler += HandleFrames;
         }
 
         private List<byte> frameChunks = new List<byte>();
@@ -136,6 +137,19 @@ namespace PROG280__Remote_Access_App_Data__
             });
         }
 
+        private void HandleFrames(BitmapImage? frame)
+        {
+            if(frame != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // Perform UI-related operations inside this block
+                    // For example, adding items to a collection bound to a UI control
+                    CurrentFrame = frame;
+                });
+            }
+        }
+
         public Bitmap GrabScreen()
         {
             Bitmap screenshot = new((int)SystemParameters.PrimaryScreenWidth, (int)SystemParameters.PrimaryScreenHeight, PixelFormat.Format32bppArgb);
@@ -162,18 +176,6 @@ namespace PROG280__Remote_Access_App_Data__
             Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(filePacket)).CopyTo(fileBytes, 0);
 
             await _dataStream.WriteAsync(fileBytes, 0, fileBytes.Length);
-        }
-
-        private async Task HandleFrames(BitmapImage? frame)
-        {
-            CurrentFrame = frame;
-
-            if(FrameHandler != null)
-            {
-                FrameHandler.Invoke(frame);
-            }
-
-            await Task.Delay(1000);
         }
 
         public async Task ReceivePackets()
@@ -214,7 +216,7 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
                             }
-                            await HandleFrames(frame);
+                            FrameHandler(frame);
                             break;
 
                         case MessageType.Message:
