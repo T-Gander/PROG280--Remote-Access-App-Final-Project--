@@ -27,7 +27,7 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class RemoteWindow : INotifyPropertyChanged
     {
-        public RemoteWindow(NetworkConnected client)
+        public RemoteWindow(ref NetworkConnected client)
         {
             InitializeComponent();
             DataContext = this;
