@@ -36,7 +36,7 @@ namespace PROG280__Remote_Access_App_Client__
             DataContext = this;
             _Client.FrameHandler += _Client_FrameHandler;
 
-            Frame = TestFrame().Result;
+            //Frame = TestFrame().Result;
             //Task.Run(Video);
         }
 
