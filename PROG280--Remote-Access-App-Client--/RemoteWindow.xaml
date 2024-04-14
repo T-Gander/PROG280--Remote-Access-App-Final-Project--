@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PROG280__Remote_Access_App_Client__"
         mc:Ignorable="d"
-        Title="emote Window" Height="800" Width="1200">
+        Title="Remote Window" Height="800" Width="1200">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -22,9 +22,8 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-
-            <RowDefinition Height="10*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Image Grid.ColumnSpan="12" Grid.RowSpan="2" Source="{Binding Path=Frame}"></Image>
+        <Image Grid.ColumnSpan="12" Source="{Binding Path=Frame}"></Image>
     </Grid>
 </Window>

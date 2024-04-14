@@ -23,6 +23,7 @@ using System.Collections.ObjectModel;
 using static PROG280__Remote_Access_App_Data__.Packet;
 using System.IO;
 using System.Drawing.Imaging;
+using System.Drawing;
 
 namespace PROG280__Remote_Access_App_Client__
 {
@@ -90,15 +91,6 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async Task ServerStatusUpdate(string message)
         {
-            if (message == "Server started!")
-            {
-                lblAppStatus.Foreground = Brushes.Green;
-            }
-            else
-            {
-                lblAppStatus.Foreground = Brushes.Black;
-            }
-
             lblAppStatus.Text = message;
 
             await Task.Delay(1000);
@@ -346,7 +338,7 @@ namespace PROG280__Remote_Access_App_Client__
                 tcs.TrySetResult(null); // Signal that the task is completed
             }
 
-            Client.RemoteWindow = new RemoteWindow(Client);
+            Client.RemoteWindow = new RemoteWindow(Client, false);
 
             Client.RemoteWindow.Closed += RemoteWindow_Closed;
             Client.RemoteWindow.Show();
@@ -365,5 +357,13 @@ namespace PROG280__Remote_Access_App_Client__
             Client.CloseConnections();
             await LocalMessageEvent("Connection closed.");
         }
+
+        private async void btnTest_Click(object sender, RoutedEventArgs e)
+        {
+            RemoteWindow remoteWindow = new RemoteWindow(Client, true);
+            remoteWindow.Show();
+            
+        }
+         //Tied to fps
     }
 }

@@ -43,7 +43,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         bool test = false;
 
-        public static BitmapImage? CurrentFrame
+        public BitmapImage? CurrentFrame
         {
             get
             {
@@ -55,7 +55,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
         }
 
-        private static BitmapImage? _currentFrame;
+        private BitmapImage? _currentFrame;
 
         public bool ReceivingFile = false;
         public string ReceivingFileName = "";
@@ -175,11 +175,13 @@ namespace PROG280__Remote_Access_App_Data__
             await _dataStream.WriteAsync(fileBytes, 0, fileBytes.Length);
         }
 
-        private void HandleFrames(BitmapImage frame)
+        private void HandleFrames(BitmapImage? frame)
         {
+            CurrentFrame = frame;
+
             if(FrameHandler != null)
             {
-                FrameHandler.Invoke(frame);
+                FrameHandler.Invoke(frame!);
             }
         }
 
