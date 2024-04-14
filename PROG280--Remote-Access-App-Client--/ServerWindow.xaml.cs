@@ -253,6 +253,8 @@ namespace PROG280__Remote_Access_App_Client__
         {
             try
             {
+                await Listen();
+
                 int i = 0;
                 while (i < 1)
                 {
