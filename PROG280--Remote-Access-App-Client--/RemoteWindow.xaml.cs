@@ -29,24 +29,14 @@ namespace PROG280__Remote_Access_App_Client__
     {
         private NetworkConnected _Client;
 
+        private RemoteWindowDataContext _RemoteWindowDataContext = new();
+
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
-            DataContext = this;
+            DataContext = _RemoteWindowDataContext;
             _Client = client;
             Task.Run(HandlePackets);
-        }
-
-        private BitmapImage? _frame;
-
-        public BitmapImage? Frame
-        {
-            get { return _frame; }
-            set
-            {
-                _frame = value;
-                OnPropertyChanged(nameof(Frame));
-            }
         }
 
         private async void HandlePackets()
@@ -57,7 +47,7 @@ namespace PROG280__Remote_Access_App_Client__
                 {
                     await Dispatcher.Invoke(async () =>
                     {
-                        Frame = await _Client.ReceiveVideoPackets();
+                        _RemoteWindowDataContext.Frame = await _Client.ReceiveVideoPackets();
                     });
                 }
             }
@@ -65,13 +55,6 @@ namespace PROG280__Remote_Access_App_Client__
             {
                 //Something bad happened
             }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
