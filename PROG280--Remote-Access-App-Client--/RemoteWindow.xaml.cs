@@ -35,6 +35,7 @@ namespace PROG280__Remote_Access_App_Client__
             InitializeComponent();
             DataContext = client;
             //Task.Run(TestVideo);
+            Task.Run(client.ReceivePackets);
         }
 
         //private async Task TestVideo()
