@@ -81,9 +81,22 @@ namespace PROG280__Remote_Access_App_Data__
 
         public ObservableCollection<string> ChatMessages {  get; set; } = new();
 
-        public BitmapImage CurrentFrame { get; set; } = new();
+        private BitmapImage? _frame;
 
-        public Task AddToLogMessagesList(string message)
+        public BitmapImage CurrentFrame
+        {
+            get
+            {
+                return _frame;
+            }
+            set
+            {
+                _frame = value;
+                OnPropertyChanged(nameof(Frame));
+            }
+        }
+
+public Task AddToLogMessagesList(string message)
         {
             LogMessages.Add(message);
             return Task.CompletedTask;
@@ -308,6 +321,11 @@ namespace PROG280__Remote_Access_App_Data__
             {
 
             }
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
