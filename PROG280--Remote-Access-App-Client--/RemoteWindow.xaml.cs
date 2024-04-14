@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using PROG280__Remote_Access_App_Client__;
 using PROG280__Remote_Access_App_Data__;
 using System;
 using System.Collections.Generic;
@@ -25,8 +24,10 @@ namespace PROG280__Remote_Access_App_Client__
     /// <summary>
     /// Interaction logic for RemoteWindow.xaml
     /// </summary>
-    public partial class RemoteWindow : INotifyPropertyChanged
+    public partial class RemoteWindow : Window
     {
+        RemoteWindowDataContext remoteWindowDataContext = new();
+
         public BitmapImage? Frame 
         { 
             get 
@@ -44,7 +45,7 @@ namespace PROG280__Remote_Access_App_Client__
         public RemoteWindow()
         {
             InitializeComponent();
-            DataContext = this;
+            DataContext = remoteWindowDataContext;
             NetworkConnected.FrameHandler += UpdateFrame;
             //Open a messaging window.
         }
