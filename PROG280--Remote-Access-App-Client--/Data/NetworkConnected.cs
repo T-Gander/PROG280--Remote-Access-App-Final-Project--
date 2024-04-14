@@ -145,7 +145,8 @@ namespace PROG280__Remote_Access_App_Data__
                 {
                     // Perform UI-related operations inside this block
                     // For example, adding items to a collection bound to a UI control
-                    CurrentFrame = frame;
+                    //CurrentFrame = frame;
+                    RemoteWindow.Frame = frame;
                 });
             }
         }

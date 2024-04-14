@@ -27,13 +27,10 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class RemoteWindow : INotifyPropertyChanged
     {
-        public delegate Task<BitmapImage?> FrameReceiver();
-        public event FrameReceiver OnFrameReceiver;
-
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
-            DataContext = client;
+            DataContext = this;
             //Task.Run(TestVideo);
             Task.Run(client.ReceivePackets);
         }
