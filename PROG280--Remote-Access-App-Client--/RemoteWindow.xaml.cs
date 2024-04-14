@@ -50,7 +50,10 @@ namespace PROG280__Remote_Access_App_Client__
 
         public void UpdateFrame(BitmapImage? frame)
         {
-            Frame = frame;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Frame = frame;
+            });
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
