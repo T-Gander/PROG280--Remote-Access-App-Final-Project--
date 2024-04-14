@@ -26,8 +26,6 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class RemoteWindow : Window
     {
-        RemoteWindowDataContext remoteWindowDataContext = new();
-
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
