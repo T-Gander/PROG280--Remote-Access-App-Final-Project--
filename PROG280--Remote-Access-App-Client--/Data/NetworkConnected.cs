@@ -87,6 +87,10 @@ namespace PROG280__Remote_Access_App_Data__
         {
             get
             {
+                if(_frame == null)
+                {
+                    return new();
+                }
                 return _frame;
             }
             set
