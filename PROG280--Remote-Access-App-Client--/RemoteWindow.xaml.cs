@@ -36,10 +36,18 @@ namespace PROG280__Remote_Access_App_Client__
 
         public void UpdateFrame(BitmapImage frame)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            { 
-                Frame = frame;
-            });
+            try
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Frame = frame;
+                });
+            }
+            catch (Exception ex)
+            {
+
+            }
+            
         }
 
         private BitmapImage? _frame;
