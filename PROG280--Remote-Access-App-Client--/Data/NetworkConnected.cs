@@ -96,7 +96,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
         }
 
-public Task AddToLogMessagesList(string message)
+        public Task AddToLogMessagesList(string message)
         {
             LogMessages.Add(message);
             return Task.CompletedTask;

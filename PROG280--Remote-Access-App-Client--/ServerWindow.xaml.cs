@@ -123,7 +123,9 @@ namespace PROG280__Remote_Access_App_Client__
             LocalMessageEvent("Starting server...");
             Client!.TcpListenerData = new(IPAddress.Any, Port);
             Client.TcpListenerData.Start();
-            
+            Client!.TcpListenerVideo = new(IPAddress.Any, Port+1);
+            Client.TcpListenerVideo.Start();
+
             LocalMessageEvent("Server started!");
         }
 
