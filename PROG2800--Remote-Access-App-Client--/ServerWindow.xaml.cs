@@ -271,33 +271,31 @@ namespace PROG280__Remote_Access_App_Client__
                     }
                     else
                     {
-                        await Task.Run(async () =>
+                        byte[] imageData;
+                        using (MemoryStream memoryStream = new MemoryStream())
                         {
-                            byte[] imageData;
-                            using (MemoryStream memoryStream = new MemoryStream())
-                            {
-                                Client!.GrabScreen().Save(memoryStream, ImageFormat.Png); // Save the bitmap to the memory stream as PNG format
-                                imageData = memoryStream.ToArray(); // Get the byte array from the memory stream
-                            }
+                            Client!.GrabScreen().Save(memoryStream, ImageFormat.Png); // Save the bitmap to the memory stream as PNG format
+                            imageData = memoryStream.ToArray(); // Get the byte array from the memory stream
+                        }
 
-                            int totalChunks = (int)Math.Ceiling((double)imageData.Length / (double)Client!.ChunkSize);
-                            int chunkIndex = 0;
+                        List<byte> frameChunks = new List<byte>();
 
-                            while (chunkIndex < totalChunks)
-                            {
-                                int offset = chunkIndex * Client!.ChunkSize;
-                                int length = Math.Min(Client!.ChunkSize, imageData.Length - offset);
-                                byte[] chunk = new byte[length];
-                                Buffer.BlockCopy(imageData, offset, chunk, 0, length);
+                        int totalChunks = (int)Math.Ceiling((double)imageData.Length / (double)1024);
+                        int chunkIndex = 0;
 
-                                // Serialize packet and send
-                                await Client!.SendPacket(MessageType.FrameChunk, chunk);
-                                chunkIndex++;
-                            }
+                        while (chunkIndex != totalChunks)
+                        {
+                            int offset = chunkIndex * Client!.ChunkSize;
+                            int length = Math.Min(Client!.ChunkSize, imageData.Length - offset);
+                            byte[] chunk = new byte[Client!.ChunkSize];
+                            Buffer.BlockCopy(imageData, offset, chunk, 0, length);
 
-                            // Send end of frame message
-                            await Client!.SendPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
-                        });
+                            // Serialize packet and send
+                            await Client!.SendPacket(MessageType.FrameChunk, chunk);
+                            chunkIndex++;
+                        }
+
+                        await Client!.SendPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
                     }
                     await Task.Delay(1000); //Tied to fps
                 }
