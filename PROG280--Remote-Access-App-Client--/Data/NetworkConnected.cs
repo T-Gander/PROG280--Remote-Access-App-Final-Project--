@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Data;
 using PROG280__Remote_Access_App_Client__;
+using static PROG280__Remote_Access_App_Client__.RemoteWindow;
 
 
 namespace PROG280__Remote_Access_App_Data__
@@ -31,7 +32,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public delegate void FrameDelegate(BitmapImage? frame);
+        public delegate void FrameDelegate(BitmapImage frame);
         public event FrameDelegate? FrameHandler;
 
         public delegate void ChunkDelegate(byte[] data);
@@ -52,6 +53,8 @@ namespace PROG280__Remote_Access_App_Data__
             FileChunkHandler += HandleFileChunks;
             ChatHandler += HandleChatMessages;
         }
+
+        private BitmapImage? _CurrentFrame { get; set; }
 
         private List<byte> frameChunks = new List<byte>();
 
@@ -163,9 +166,11 @@ namespace PROG280__Remote_Access_App_Data__
 
         private void HandleFrames(BitmapImage? frame)
         {
+            _CurrentFrame = frame;
+
             if(FrameHandler != null)
             {
-                FrameHandler.Invoke(frame!);
+                FrameHandler.Invoke(frame);
             }
         }
 
@@ -244,6 +249,11 @@ namespace PROG280__Remote_Access_App_Data__
             {
 
             }
+        }
+
+        public async Task<BitmapImage?> RetreiveCurrentFrame()
+        {
+            return _CurrentFrame;
         }
     }
 }

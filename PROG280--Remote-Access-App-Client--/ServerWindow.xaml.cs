@@ -364,6 +364,7 @@ namespace PROG280__Remote_Access_App_Client__
             remoteWindow.Show();
             
         }
+
          //Tied to fps
     }
 }

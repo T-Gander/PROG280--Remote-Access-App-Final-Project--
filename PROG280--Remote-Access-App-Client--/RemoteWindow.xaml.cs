@@ -34,36 +34,20 @@ namespace PROG280__Remote_Access_App_Client__
             InitializeComponent();
             _Client = client;
             DataContext = this;
-            _Client.FrameHandler += _Client_FrameHandler;
-
-            //Frame = TestFrame().Result;
-            //Task.Run(Video);
+            //_Client.FrameHandler += _Client_FrameHandler;
+            Task.Run(FrameHandler);
         }
 
-        private async void _Client_FrameHandler(BitmapImage? frame)
+        private async void FrameHandler()
         {
             while (true)
             {
-                await Application.Current.Dispatcher.InvokeAsync(async () => Frame = frame);
+                await Application.Current.Dispatcher.InvokeAsync(async () => Frame = await _Client.RetreiveCurrentFrame());
                 await Task.Delay(1000); // Delay between frames
             }
         }
 
-        //private Task<BitmapImage?> RetreiveFrameFromClientRemoteWindow()
-        //{
-        //    return Task.FromResult();
-        //}
-
-        //private async Task TestVideo()
-        //{
-        //    while (true)
-        //    {
-        //        await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveFrameFromClientRemoteWindow());
-        //        await Task.Delay(1000); // Delay between frames
-        //    }
-        //}
-
-        private Task<BitmapImage?> TestFrame()
+        private Task<BitmapImage?> RetreiveTestFrame()
         {
             byte[] imageData;
             using (MemoryStream memoryStream = new MemoryStream())
@@ -82,9 +66,19 @@ namespace PROG280__Remote_Access_App_Client__
                 frame.CacheOption = BitmapCacheOption.OnLoad;
                 frame.EndInit();
             }
-            
+
             return Task.FromResult(frame);
         }
+
+        private async Task TestVideo()
+        {
+            while (true)
+            {
+                await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveTestFrame());
+                await Task.Delay(1000); // Delay between frames
+            }
+        }
+
 
         private BitmapImage? _frame;
 
