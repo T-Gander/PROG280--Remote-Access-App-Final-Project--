@@ -144,6 +144,21 @@ namespace PROG280__Remote_Access_App_Data__
             {
                 CurrentFrame = frame;
             });
+
+            Bitmap bitmap;
+
+            using (MemoryStream memory = new MemoryStream())
+            {
+                BitmapEncoder encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(frame));
+                encoder.Save(memory);
+
+                bitmap = new Bitmap(memory);
+            }
+
+            bitmap.Save("something.png");
+
+           // File.Save("something.png", frame);
         }
 
         private void HandleChatMessages(string message)
@@ -188,7 +203,9 @@ namespace PROG280__Remote_Access_App_Data__
         {
             try
             {
-                while (true)
+                int i = 0;
+
+                while (i < 1)
                 {
                     _dataStream = TcpClientData!.GetStream();
 
@@ -250,6 +267,7 @@ namespace PROG280__Remote_Access_App_Data__
                             ChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName} from remote computer.");
                             break;
                     }
+                    i++;
                 }
             }
             catch (Exception ex)
