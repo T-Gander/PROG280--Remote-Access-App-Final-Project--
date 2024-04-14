@@ -65,7 +65,10 @@ namespace PROG280__Remote_Access_App_Client__
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            });
         }
     }
 }
