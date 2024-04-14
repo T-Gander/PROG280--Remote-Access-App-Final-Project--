@@ -346,7 +346,7 @@ namespace PROG280__Remote_Access_App_Client__
                 tcs.TrySetResult(null); // Signal that the task is completed
             }
 
-            Client.RemoteWindow = new RemoteWindow();
+            Client.RemoteWindow = new RemoteWindow(Client);
 
             Client.RemoteWindow.Closed += RemoteWindow_Closed;
             Client.RemoteWindow.Show();

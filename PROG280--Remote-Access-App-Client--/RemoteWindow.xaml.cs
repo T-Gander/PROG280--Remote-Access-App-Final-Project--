@@ -28,11 +28,11 @@ namespace PROG280__Remote_Access_App_Client__
     {
         RemoteWindowDataContext remoteWindowDataContext = new();
 
-        public RemoteWindow()
+        public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
             DataContext = remoteWindowDataContext;
-            NetworkConnected.FrameHandler += UpdateFrame;
+            client.FrameHandler += UpdateFrame;
             //Open a messaging window.
         }
 
