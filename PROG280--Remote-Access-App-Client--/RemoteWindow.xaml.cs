@@ -29,29 +29,39 @@ namespace PROG280__Remote_Access_App_Client__
     {
         private NetworkConnected _Client { get; set; }
 
-        public RemoteWindow(NetworkConnected client, bool test)
+        public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
             _Client = client;
             DataContext = this;
+            _Client.FrameHandler += _Client_FrameHandler;
 
             Frame = TestFrame().Result;
-            Task.Run(Video);
+            //Task.Run(Video);
         }
 
-        private Task<BitmapImage?> RetreiveFrameFromClientRemoteWindow()
-        {
-            return Task.FromResult(_Client.CurrentFrame);
-        }
-
-        private async Task Video()
+        private async void _Client_FrameHandler(BitmapImage? frame)
         {
             while (true)
             {
-                await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveFrameFromClientRemoteWindow());
+                await Application.Current.Dispatcher.Invoke(async () => Frame = frame);
                 await Task.Delay(1000); // Delay between frames
             }
         }
+
+        //private Task<BitmapImage?> RetreiveFrameFromClientRemoteWindow()
+        //{
+        //    return Task.FromResult();
+        //}
+
+        //private async Task TestVideo()
+        //{
+        //    while (true)
+        //    {
+        //        await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveFrameFromClientRemoteWindow());
+        //        await Task.Delay(1000); // Delay between frames
+        //    }
+        //}
 
         private Task<BitmapImage?> TestFrame()
         {

@@ -338,7 +338,7 @@ namespace PROG280__Remote_Access_App_Client__
                 tcs.TrySetResult(null); // Signal that the task is completed
             }
 
-            Client.RemoteWindow = new RemoteWindow(Client, false);
+            Client.RemoteWindow = new RemoteWindow(Client);
 
             Client.RemoteWindow.Closed += RemoteWindow_Closed;
             Client.RemoteWindow.Show();
@@ -360,7 +360,7 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            RemoteWindow remoteWindow = new RemoteWindow(Client, true);
+            RemoteWindow remoteWindow = new RemoteWindow(Client);
             remoteWindow.Show();
             
         }

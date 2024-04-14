@@ -43,20 +43,6 @@ namespace PROG280__Remote_Access_App_Data__
 
         bool test = false;
 
-        public BitmapImage? CurrentFrame
-        {
-            get
-            {
-                return _currentFrame;
-            }
-            set
-            {
-                _currentFrame = value;
-            }
-        }
-
-        private BitmapImage? _currentFrame;
-
         public bool ReceivingFile = false;
         public string ReceivingFileName = "";
 
@@ -177,8 +163,6 @@ namespace PROG280__Remote_Access_App_Data__
 
         private void HandleFrames(BitmapImage? frame)
         {
-            CurrentFrame = frame;
-
             if(FrameHandler != null)
             {
                 FrameHandler.Invoke(frame!);
