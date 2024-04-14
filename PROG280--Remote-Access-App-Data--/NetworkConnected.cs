@@ -27,14 +27,6 @@ namespace PROG280__Remote_Access_App_Data__
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            });
-        }
-
         public delegate void FrameDelegate(BitmapImage frame);
         public event FrameDelegate FrameHandler;
 
@@ -47,7 +39,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         bool test = false;
 
-        public BitmapImage? CurrentFrame
+        public static BitmapImage? CurrentFrame
         {
             get
             {
@@ -56,11 +48,10 @@ namespace PROG280__Remote_Access_App_Data__
             set
             {
                 _currentFrame = value;
-                OnPropertyChanged(nameof(CurrentFrame));
             }
         }
 
-        private BitmapImage? _currentFrame;
+        private static BitmapImage? _currentFrame;
 
         public bool ReceivingFile = false;
         public string ReceivingFileName = "";

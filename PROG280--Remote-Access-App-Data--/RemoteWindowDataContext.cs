@@ -14,9 +14,8 @@ namespace PROG280__Remote_Access_App_Data__
 {
     public class RemoteWindowDataContext : System.ComponentModel.INotifyPropertyChanged
     {
-        public RemoteWindowDataContext(string ip) 
+        public RemoteWindowDataContext() 
         {
-            RemoteIP = ip;
         }
 
         private BitmapImage? _frame;
