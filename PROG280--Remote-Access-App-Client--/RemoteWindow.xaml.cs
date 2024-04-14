@@ -38,7 +38,10 @@ namespace PROG280__Remote_Access_App_Client__
 
         public void UpdateFrame(BitmapImage frame)
         {
-            remoteWindowDataContext.Frame = frame;
+            Dispatcher.Invoke(() =>
+            { 
+                remoteWindowDataContext.Frame = frame;
+            });
         }
     }
 }
