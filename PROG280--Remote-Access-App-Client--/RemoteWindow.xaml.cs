@@ -27,6 +27,9 @@ namespace PROG280__Remote_Access_App_Client__
     /// </summary>
     public partial class RemoteWindow : INotifyPropertyChanged
     {
+        public delegate Task<BitmapImage?> FrameReceiver();
+        public event FrameReceiver OnFrameReceiver;
+
         private NetworkConnected _Client { get; set; }
 
         public RemoteWindow(NetworkConnected client)
@@ -36,14 +39,27 @@ namespace PROG280__Remote_Access_App_Client__
             DataContext = this;
             //_Client.FrameHandler += _Client_FrameHandler;
             Task.Run(FrameHandler);
+            //Task.Run(TestVideo);
+        }
+
+        private async Task TestVideo()
+        {
+            while (true)
+            {
+                await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveTestFrame());
+                await Task.Delay(1000); // Delay between frames
+            }
         }
 
         private async void FrameHandler()
         {
             while (true)
             {
-                await Application.Current.Dispatcher.InvokeAsync(async () => Frame = await _Client.RetreiveCurrentFrame());
-                await Task.Delay(1000); // Delay between frames
+                if(OnFrameReceiver != null)
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(async () => Frame = await OnFrameReceiver.Invoke());
+                    await Task.Delay(1000); // Delay between frames
+                }
             }
         }
 
@@ -70,15 +86,21 @@ namespace PROG280__Remote_Access_App_Client__
             return Task.FromResult(frame);
         }
 
-        private async Task TestVideo()
+        private async Task<BitmapImage?> ReceiveFrame(byte[] imageData)
         {
-            while (true)
-            {
-                await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveTestFrame());
-                await Task.Delay(1000); // Delay between frames
-            }
-        }
+            BitmapImage? frame;
 
+            using (MemoryStream mstream = new(imageData))
+            {
+                frame = new BitmapImage();
+                frame.BeginInit();
+                frame.StreamSource = mstream;
+                frame.CacheOption = BitmapCacheOption.OnLoad;
+                frame.EndInit();
+            }
+
+            return frame;
+        }
 
         private BitmapImage? _frame;
 

@@ -54,8 +54,6 @@ namespace PROG280__Remote_Access_App_Data__
             ChatHandler += HandleChatMessages;
         }
 
-        private BitmapImage? _CurrentFrame { get; set; }
-
         private List<byte> frameChunks = new List<byte>();
 
         private List<byte> fileChunks = new List<byte>();
@@ -75,6 +73,8 @@ namespace PROG280__Remote_Access_App_Data__
         public ObservableCollection<string> LogMessages { get; set; } = new();
 
         public ObservableCollection<string> ChatMessages {  get; set; } = new();
+
+        public BitmapImage CurrentFrame { get; set; } = new();
 
         public Task AddToLogMessagesList(string message)
         {
@@ -166,7 +166,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         private void HandleFrames(BitmapImage? frame)
         {
-            _CurrentFrame = frame;
+            CurrentFrame = frame;
 
             if(FrameHandler != null)
             {
@@ -212,9 +212,6 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
                             }
-                            //CurrentFrame = frame;
-                            
-
                             HandleFrames(frame);
                             break;
 
@@ -251,9 +248,25 @@ namespace PROG280__Remote_Access_App_Data__
             }
         }
 
-        public async Task<BitmapImage?> RetreiveCurrentFrame()
+        private Task<BitmapImage?> GetFrame(byte[] bytes)
         {
-            return _CurrentFrame;
+            BitmapImage? frame;
+
+            using (MemoryStream mstream = new(bytes))
+            {
+                frame = new BitmapImage();
+                frame.BeginInit();
+                frame.StreamSource = mstream;
+                frame.CacheOption = BitmapCacheOption.OnLoad;
+                frame.EndInit();
+            }
+
+            return Task.FromResult(frame);
+        }
+
+        public Task<BitmapImage?> RemoteWindow_OnFrameReceiver()
+        {
+            return Task.FromResult(CurrentFrame); 
         }
     }
 }

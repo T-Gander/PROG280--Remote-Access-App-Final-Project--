@@ -339,6 +339,7 @@ namespace PROG280__Remote_Access_App_Client__
             }
 
             Client.RemoteWindow = new RemoteWindow(Client);
+            Client.RemoteWindow.OnFrameReceiver += Client.RemoteWindow_OnFrameReceiver;
 
             Client.RemoteWindow.Closed += RemoteWindow_Closed;
             Client.RemoteWindow.Show();
