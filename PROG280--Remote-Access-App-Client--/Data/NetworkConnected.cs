@@ -31,7 +31,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public delegate void FrameDelegate(BitmapImage frame);
+        public delegate void FrameDelegate();
         public event FrameDelegate FrameHandler;
 
         public delegate void ChunkDelegate(byte[] data);
@@ -138,7 +138,7 @@ namespace PROG280__Remote_Access_App_Data__
             frameChunks.AddRange(chunk);
         }
 
-        private void HandleFrames(BitmapImage? frame)
+        private void HandleFrames()
         {
             RemoteWindow.UpdateFrame();
         }
@@ -219,7 +219,8 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.CacheOption = BitmapCacheOption.OnLoad;
                                 frame.EndInit();
                             }
-                            FrameHandler(frame);
+                            CurrentFrame = frame;
+                            FrameHandler();
                             break;
 
                         case MessageType.Message:
