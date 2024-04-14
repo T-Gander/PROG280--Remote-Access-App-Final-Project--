@@ -255,8 +255,7 @@ namespace PROG280__Remote_Access_App_Client__
             {
                 await Listen();
 
-                int i = 0;
-                while (i < 1)
+                while (true)
                 {
                     if (!Client!.IsConnected)
                     {
@@ -292,7 +291,6 @@ namespace PROG280__Remote_Access_App_Client__
 
                         await Client!.SendVideoPacket(MessageType.FrameEnd, new byte[Client.ChunkSize]);
                     }
-                    i++;
                     await Task.Delay(1000); //Tied to fps
                 }
             }
