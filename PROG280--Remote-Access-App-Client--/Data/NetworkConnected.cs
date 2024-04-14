@@ -207,16 +207,19 @@ namespace PROG280__Remote_Access_App_Data__
                         case MessageType.FrameEnd:
                             byte[] bitmapBytes = frameChunks.ToArray();
                             frameChunks.Clear();
-                            BitmapImage? frame;
+                            BitmapImage? frame = new();
 
-                            using (MemoryStream mstream = new(bitmapBytes))
+                            await Task.Run(() =>
                             {
-                                frame = new BitmapImage();
-                                frame.BeginInit();
-                                frame.StreamSource = mstream;
-                                frame.CacheOption = BitmapCacheOption.OnLoad;
-                                frame.EndInit();
-                            }
+                                using (MemoryStream mstream = new(bitmapBytes))
+                                {
+                                    frame = new BitmapImage();
+                                    frame.BeginInit();
+                                    frame.StreamSource = mstream;
+                                    frame.CacheOption = BitmapCacheOption.OnLoad;
+                                    frame.EndInit();
+                                }
+                            });
 
                             Application.Current.Dispatcher.Invoke(() =>
                             {
