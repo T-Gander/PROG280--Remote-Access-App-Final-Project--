@@ -44,7 +44,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             while (true)
             {
-                await Application.Current.Dispatcher.Invoke(async () => Frame = frame);
+                await Application.Current.Dispatcher.InvokeAsync(async () => Frame = frame);
                 await Task.Delay(1000); // Delay between frames
             }
         }
