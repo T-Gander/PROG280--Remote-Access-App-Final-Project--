@@ -18,7 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using static PROG280__Remote_Access_App_Data__.Packet;
 
-namespace PROG2800__Remote_Access_App_Client__
+namespace PROG280__Remote_Access_App_Client__
 {
     /// <summary>
     /// Interaction logic for MessagingWindow.xaml

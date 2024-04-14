@@ -20,6 +20,7 @@ using System.Net.Http;
 using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Data;
+using PROG280__Remote_Access_App_Client__;
 
 
 namespace PROG280__Remote_Access_App_Data__

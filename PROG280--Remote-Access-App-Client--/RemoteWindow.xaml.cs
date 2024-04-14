@@ -20,7 +20,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace PROG2800__Remote_Access_App_Client__
+namespace PROG280__Remote_Access_App_Client__
 {
     /// <summary>
     /// Interaction logic for RemoteWindow.xaml
@@ -44,9 +44,13 @@ namespace PROG2800__Remote_Access_App_Client__
         public RemoteWindow()
         {
             InitializeComponent();
-            Frame = NetworkConnected.CurrentFrame;
             DataContext = this;
             //Open a messaging window.
+        }
+
+        public void UpdateFrame(BitmapImage? frame)
+        {
+            Frame = frame;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
