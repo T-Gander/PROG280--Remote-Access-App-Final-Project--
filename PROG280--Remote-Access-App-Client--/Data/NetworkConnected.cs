@@ -224,6 +224,7 @@ namespace PROG280__Remote_Access_App_Data__
                                 frame.EndInit();
                             }
                             //CurrentFrame = frame;
+                            
 
                             HandleFrames(frame);
                             break;

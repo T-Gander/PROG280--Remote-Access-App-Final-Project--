@@ -25,84 +25,55 @@ namespace PROG280__Remote_Access_App_Client__
     /// <summary>
     /// Interaction logic for RemoteWindow.xaml
     /// </summary>
-    public partial class RemoteWindow : Window
+    public partial class RemoteWindow : INotifyPropertyChanged
     {
         private NetworkConnected _Client { get; set; }
-        private bool _Test { get; set; }
 
         public RemoteWindow(NetworkConnected client, bool test)
         {
             InitializeComponent();
             _Client = client;
-            _Test = test;
             DataContext = this;
 
-            while (true)
-            {
-                Frame = ReadFrame().Result;
-            }
-            //if (_Test)
-            //{
-            //    Frame = TestFrame().Result;
-            //}
-            //else
-            //{
-            //    Frame = ReadFrame().Result;
-            //    //_Client.FrameHandler += AddFrame;
-            //}
-            
-            //Open a messaging window.
+            Frame = TestFrame().Result;
+            Task.Run(Video);
         }
 
-        private Task<BitmapImage?> ReadFrame()
+        private Task<BitmapImage?> RetreiveFrameFromClientRemoteWindow()
         {
             return Task.FromResult(_Client.CurrentFrame);
         }
 
-        private Task<BitmapImage?> TestFrame()
+        private async Task Video()
         {
-            int i = 0;
-            int j = 0;
-
             while (true)
             {
-                if (j < 1)
-                {
-                    byte[] imageData;
-                    using (MemoryStream memoryStream = new MemoryStream())
-                    {
-                        _Client!.GrabScreen().Save(memoryStream, ImageFormat.Png); // Save the bitmap to the memory stream as PNG format
-                        imageData = memoryStream.ToArray(); // Get the byte array from the memory stream
-                    }
-
-                    BitmapImage? frame;
-
-                    using (MemoryStream mstream = new(imageData))
-                    {
-                        frame = new BitmapImage();
-                        frame.BeginInit();
-                        frame.StreamSource = mstream;
-                        frame.CacheOption = BitmapCacheOption.OnLoad;
-                        frame.EndInit();
-                    }
-
-                    if (i < 1)
-                    {
-                        Bitmap bitmap;
-                        using (MemoryStream stream = new MemoryStream(imageData))
-                        {
-                            bitmap = new Bitmap(stream);
-                        }
-
-                        bitmap.Save("something.png", ImageFormat.Png);
-                        i++;
-                    }
-
-                    return Task.FromResult(frame);
-                    //await Task.Delay(1000);
-                }
-                return null;
+                await Application.Current.Dispatcher.Invoke(async () => Frame = await RetreiveFrameFromClientRemoteWindow());
+                await Task.Delay(1000); // Delay between frames
             }
+        }
+
+        private Task<BitmapImage?> TestFrame()
+        {
+            byte[] imageData;
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                _Client!.GrabScreen().Save(memoryStream, ImageFormat.Png); // Save the bitmap to the memory stream as PNG format
+                imageData = memoryStream.ToArray(); // Get the byte array from the memory stream
+            }
+
+            BitmapImage? frame;
+
+            using (MemoryStream mstream = new(imageData))
+            {
+                frame = new BitmapImage();
+                frame.BeginInit();
+                frame.StreamSource = mstream;
+                frame.CacheOption = BitmapCacheOption.OnLoad;
+                frame.EndInit();
+            }
+            
+            return Task.FromResult(frame);
         }
 
         private BitmapImage? _frame;
