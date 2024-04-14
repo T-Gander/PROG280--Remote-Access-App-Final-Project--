@@ -30,7 +30,7 @@ namespace PROG280__Remote_Access_App_Client__
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
-            DataContext = this;
+            DataContext = client;
             Task.Run(client.ReceiveVideoPackets);
         }
     }
