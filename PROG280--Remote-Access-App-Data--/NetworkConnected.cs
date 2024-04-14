@@ -42,6 +42,8 @@ namespace PROG280__Remote_Access_App_Data__
         public delegate void ChatDelegate(string message);
         public event ChatDelegate ChatHandler;
 
+        bool test = false;
+
         public BitmapImage? CurrentFrame
         {
             get
@@ -145,20 +147,24 @@ namespace PROG280__Remote_Access_App_Data__
                 CurrentFrame = frame;
             });
 
-            Bitmap bitmap;
-
-            using (MemoryStream memory = new MemoryStream())
+            if (!test)
             {
-                BitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(frame));
-                encoder.Save(memory);
+                Bitmap bitmap;
 
-                bitmap = new Bitmap(memory);
+                using (MemoryStream memory = new MemoryStream())
+                {
+                    BitmapEncoder encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(frame));
+                    encoder.Save(memory);
+
+                    bitmap = new Bitmap(memory);
+                }
+
+                bitmap.Save("something.png");
+
+                // File.Save("something.png", frame);
+                test = true;
             }
-
-            bitmap.Save("something.png");
-
-           // File.Save("something.png", frame);
         }
 
         private void HandleChatMessages(string message)
@@ -203,9 +209,7 @@ namespace PROG280__Remote_Access_App_Data__
         {
             try
             {
-                int i = 0;
-
-                while (i < 1)
+                while (true)
                 {
                     _dataStream = TcpClientData!.GetStream();
 
@@ -267,7 +271,6 @@ namespace PROG280__Remote_Access_App_Data__
                             ChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName} from remote computer.");
                             break;
                     }
-                    i++;
                 }
             }
             catch (Exception ex)
