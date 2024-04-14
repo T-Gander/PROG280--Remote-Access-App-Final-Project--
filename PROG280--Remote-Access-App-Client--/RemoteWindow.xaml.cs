@@ -34,7 +34,7 @@ namespace PROG280__Remote_Access_App_Client__
             //Open a messaging window.
         }
 
-        public void UpdateFrame(BitmapImage frame)
+        public void UpdateFrame(BitmapImage? frame)
         {
             try
             {

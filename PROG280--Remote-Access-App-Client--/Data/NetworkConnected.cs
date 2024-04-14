@@ -31,7 +31,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public delegate void FrameDelegate(BitmapImage frame);
+        public delegate void FrameDelegate(BitmapImage? frame);
         public event FrameDelegate? FrameHandler;
 
         public delegate void ChunkDelegate(byte[] data);
@@ -175,7 +175,7 @@ namespace PROG280__Remote_Access_App_Data__
             await _dataStream.WriteAsync(fileBytes, 0, fileBytes.Length);
         }
 
-        private void HandleFrames(BitmapImage frame)
+        private void HandleFrames(BitmapImage? frame)
         {
             if(FrameHandler != null)
             {
