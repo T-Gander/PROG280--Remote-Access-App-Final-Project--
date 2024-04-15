@@ -107,6 +107,7 @@ namespace PROG280__Remote_Access_App_Client__
             }
 
             await client!.SendDataPacket(MessageType.FileEnd, new byte[client.ChunkSize]);
+            client.ChatMessages.Add($"File sent successfully.");
         }
 
         private async void btnSendMessage_Click(object sender, RoutedEventArgs e)
