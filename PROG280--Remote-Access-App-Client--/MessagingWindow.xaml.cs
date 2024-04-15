@@ -74,6 +74,10 @@ namespace PROG280__Remote_Access_App_Client__
                         {
                             tcs.TrySetResult(true); // Signal that the file sending has completed
                         }
+                        else
+                        {
+                            tcs.TrySetResult(false);
+                        }
                     };
 
                     await Task.WhenAny(tcs.Task);
