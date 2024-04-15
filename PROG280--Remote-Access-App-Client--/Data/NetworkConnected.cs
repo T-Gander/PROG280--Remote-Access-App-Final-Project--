@@ -42,6 +42,7 @@ namespace PROG280__Remote_Access_App_Data__
 
         public delegate void ChatDelegate(string message);
         public event ChatDelegate ChatHandler;
+        public event ChatDelegate LocalChatHandler;
 
         public bool AcceptReceivingFile = false;
 
@@ -72,6 +73,7 @@ namespace PROG280__Remote_Access_App_Data__
             ChunkHandler += HandleFrameChunks;
             FileChunkHandler += HandleFileChunks;
             ChatHandler += HandleChatMessages;
+            LocalChatHandler += HandleLocalChatMessages;
             FrameHandler += HandleFrames;
         }
 
@@ -182,6 +184,16 @@ namespace PROG280__Remote_Access_App_Data__
                 // Perform UI-related operations inside this block
                 // For example, adding items to a collection bound to a UI control
                 ChatMessages.Add($"{DisplayName}: {message}");
+            });
+        }
+
+        private void HandleLocalChatMessages(string message)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // Perform UI-related operations inside this block
+                // For example, adding items to a collection bound to a UI control
+                ChatMessages.Add($"{message}");
             });
         }
 
@@ -325,7 +337,7 @@ namespace PROG280__Remote_Access_App_Data__
                             if (!AcceptReceivingFile)
                             {
                                 ReceivingFileName = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
-                                ChatMessages.Add($"The other user is attempting to send file... {ReceivingFileName}");
+                                LocalChatHandler($"The other user is attempting to send file... {ReceivingFileName}");
 
                                 bool acceptFile = await ShowAcceptFilePopupAsync();
 
@@ -361,10 +373,9 @@ namespace PROG280__Remote_Access_App_Data__
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 MessagingWindow.EnableSendFiles();
+                                LocalChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
                             });
 
-
-                            ChatMessages.Add($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
                             break;
                     }
                 }
