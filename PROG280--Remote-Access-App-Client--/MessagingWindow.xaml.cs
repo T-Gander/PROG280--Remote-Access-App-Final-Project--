@@ -65,7 +65,18 @@ namespace PROG280__Remote_Access_App_Client__
                 {
                     await client.SendDataPacket(MessageType.FileChunk , ofd.SafeFileName);
 
-                    await Task.WhenAny(Task.Delay(10000));
+                    var tcs = new TaskCompletionSource<bool>();
+
+                    // Set up an event handler for the SendingFileChanged event
+                    client.SendingFileChanged += (s, args) =>
+                    {
+                        if (!client.SendingFile)
+                        {
+                            tcs.TrySetResult(true); // Signal that the file sending has completed
+                        }
+                    };
+
+                    await Task.WhenAny(tcs.Task);
 
                     if (client.SendingFile)
                     {

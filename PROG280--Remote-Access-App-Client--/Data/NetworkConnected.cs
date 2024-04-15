@@ -44,7 +44,24 @@ namespace PROG280__Remote_Access_App_Data__
         public event ChatDelegate ChatHandler;
 
         public bool AcceptReceivingFile = false;
-        public bool SendingFile = false;
+
+        public event EventHandler SendingFileChanged;
+
+        private bool _sendingFile;
+        public bool SendingFile
+        {
+            get { return _sendingFile; }
+            set
+            {
+                _sendingFile = value;
+                OnSendingFileChanged();
+            }
+        }
+
+        protected virtual void OnSendingFileChanged()
+        {
+            SendingFileChanged?.Invoke(this, EventArgs.Empty);
+        }
 
         public string ReceivingFileName = "";
 
