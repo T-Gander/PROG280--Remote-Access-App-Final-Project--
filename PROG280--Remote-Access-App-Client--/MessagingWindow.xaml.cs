@@ -65,7 +65,7 @@ namespace PROG280__Remote_Access_App_Client__
                 {
                     await client.SendDataPacket(MessageType.FileChunk , ofd.SafeFileName);
 
-                    await Task.WhenAny(Task.FromResult(client.SendingFile), Task.Delay(5000));
+                    await Task.WhenAny(Task.Delay(5000));
 
                     if (client.SendingFile)
                     {
