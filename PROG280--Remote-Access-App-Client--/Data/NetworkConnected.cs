@@ -325,7 +325,7 @@ namespace PROG280__Remote_Access_App_Data__
                             if (!AcceptReceivingFile)
                             {
                                 ReceivingFileName = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
-                                ChatHandler($"The other user is attempting to send file... {ReceivingFileName}");
+                                ChatMessages.Add($"The other user is attempting to send file... {ReceivingFileName}");
 
                                 bool acceptFile = await ShowAcceptFilePopupAsync();
 
@@ -364,7 +364,7 @@ namespace PROG280__Remote_Access_App_Data__
                             });
 
 
-                            ChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
+                            ChatMessages.Add($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
                             break;
                     }
                 }
