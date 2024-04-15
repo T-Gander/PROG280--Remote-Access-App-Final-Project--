@@ -93,20 +93,54 @@ namespace PROG280__Remote_Access_App_Client__
         {
             lblAppStatus.Text = message;
 
-            await Task.Delay(1000);
+            await Task.Delay(400);
         }
 
-        private async void StopServer()
+        private async Task StopServer()
         {
-            //Client!.ShutDown();
             await LocalMessageEvent?.Invoke("Stopping server...")!;
             await Client!.CloseConnections();
-            await ChangeServerState();
+            await LocalMessageEvent("Server stopped successfully.");
         }
 
-        private void Stop_Click(object sender, RoutedEventArgs e)
+        private async void btnStartServer_Click(object sender, RoutedEventArgs e)
         {
-            StopServer();
+            await BlockServerOperations();
+
+            try
+            {
+                //await ChangeUIState();
+                await StartServer();
+                await LocalMessageEvent($"Listening on port {Port}.");
+                await LocalMessageEvent("Retreiving external IP...");
+
+                var successfulIp = await Task.Run(TryRetreiveIP);
+
+                if (!successfulIp)
+                {
+                    await StopServer();
+                    return;
+                }
+                else
+                {
+                    Task.Run(CheckConnection);
+                    await UpdateServerUI();
+                    await UnblockServerOperations();
+                }
+            }
+            catch (Exception ex)
+            {
+                await LocalMessageEvent($"Error logged: {ex.Message})");
+                await LocalMessageEvent($"ERROR, Check Logs.");
+            }
+        }
+
+        private async void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            await BlockServerOperations();
+            await StopServer();
+            await UpdateServerUI();
+            await UnblockServerOperations();
         }
 
         private void btnLogs_Click(object sender, RoutedEventArgs e)
@@ -130,38 +164,54 @@ namespace PROG280__Remote_Access_App_Client__
             await LocalMessageEvent("Server started!");
         }
 
-        private async Task ChangeServerState()
+        private Task BlockServerOperations()
+        {
+            btnStartServer.IsEnabled = false;
+            btnRequestConnection.IsEnabled = false;
+            txtServerIp.IsEnabled = false;
+
+            return Task.CompletedTask;
+        }
+
+        private Task UnblockServerOperations()
+        {
+            btnStartServer.IsEnabled = true;
+            btnRequestConnection.IsEnabled = true;
+            txtServerIp.IsEnabled = true;
+
+            return Task.CompletedTask;
+        }
+
+        private async Task UpdateServerUI()
         {
             switch (btnStartServer.Content)
             {
                 case "Stop the Server":
                     try
                     {
-                        await LocalMessageEvent("Server stopped.");
-
                         btnStartServer.Click -= Stop_Click;
                         btnStartServer.Click += btnStartServer_Click;
                         btnStartServer.Content = "Start a Server";
 
-                        btnRequestConnection.IsEnabled = true;
-                        txtServerIp.IsEnabled = true;
-
-                        await LocalMessageEvent("Server state successfully changed.");
                     }
                     catch (Exception ex)
                     {
-                        await LocalMessageEvent($"Something went wrong, error: {ex.Message}");
+                        await LocalMessageEvent($"Something went wrong changing UI state, error: {ex.Message}");
                     }
                     break;
 
                 case "Start a Server":
-                    btnStartServer.Click -= btnStartServer_Click;
-                    btnStartServer.Click += Stop_Click;
-                    btnStartServer.Content = "Stop the Server";
+                    try
+                    {
+                        btnStartServer.Click -= btnStartServer_Click;
+                        btnStartServer.Click += Stop_Click;
+                        btnStartServer.Content = "Stop the Server";
 
-                    btnRequestConnection.IsEnabled = false;
-                    txtServerIp.IsEnabled = false;
-                    await LocalMessageEvent("Server state successfully changed.");
+                    }
+                    catch (Exception ex)
+                    {
+                        await LocalMessageEvent($"Something went wrong changing UI state, error: {ex.Message}");
+                    }
                     break;
             }
         }
@@ -182,12 +232,18 @@ namespace PROG280__Remote_Access_App_Client__
                         i--;
                     }
                     else
-                        await LocalMessageEvent($"Found IP: {ipstring}");
+                        await Application.Current.Dispatcher.Invoke(async () =>
+                        {
+                            await LocalMessageEvent($"Found IP: {ipstring}");
+                        });
                 }
 
-                txtServerIp.Text = $"{localIPs[0]}";
+                await Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    txtServerIp.Text = $"{localIPs[0]}";
+                    await LocalMessageEvent($"Selected IP: {txtServerIp.Text}");
+                });
 
-                await LocalMessageEvent($"Selected IP: {txtServerIp.Text}");
                 return true;
             }
             catch (Exception ex)
@@ -224,32 +280,6 @@ namespace PROG280__Remote_Access_App_Client__
             }
         }
 
-        private async void btnStartServer_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                await ChangeServerState();
-
-                await StartServer();
-
-                await LocalMessageEvent($"Listening on port {Port}.");
-
-                await LocalMessageEvent("Retreiving external IP...");
-
-                if (!await TryRetreiveIP())
-                {
-                    StopServer();
-                    return;
-                }
-
-                await CheckConnection();
-            }
-            catch (Exception ex)
-            {
-                await LocalMessageEvent($"Error logged: {ex.Message})");
-                await LocalMessageEvent($"ERROR, Check Logs.");
-            }
-        }
 
         private async Task CheckConnection()
         {
@@ -306,14 +336,22 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async Task Listen()
         {
-            await LocalMessageEvent("Listening...");
+            await Application.Current.Dispatcher.Invoke(async () =>
+            {
+                await LocalMessageEvent("Listening...");
+            });
+
             Client!.TcpClientData = await Client!.TcpListenerData!.AcceptTcpClientAsync();
             Client!.TcpClientVideo = await Client!.TcpListenerVideo!.AcceptTcpClientAsync();
 
             Client.TcpListenerData.Stop();
             Client.TcpListenerVideo.Stop();
 
-            await LocalMessageEvent($"Connection Established with {Client!.TcpClientData.Client.RemoteEndPoint}.");
+            await Application.Current.Dispatcher.Invoke(async () =>
+            {
+                await LocalMessageEvent($"Connection Established with {Client!.TcpClientData.Client.RemoteEndPoint}.");
+            });
+
             Client!.IsConnected = true;
             _messagingWindow = new MessagingWindow(Client);
             _messagingWindow.Show();

@@ -109,16 +109,16 @@ namespace PROG280__Remote_Access_App_Data__
             return Task.CompletedTask;
         }
 
-        public async Task CloseConnections()
+        public Task CloseConnections()
         {
-            _dataStream?.Close();
-            _videoStream?.Close();
-            TcpClientVideo?.Close();
-            TcpClientData?.Close();
-            _videoStream?.Dispose();
+            TcpListenerData?.Dispose();
+            TcpListenerVideo?.Dispose();
             TcpClientVideo?.Dispose();
             TcpClientData?.Dispose();
-            _dataStream?.Dispose();
+
+            IsConnected = false;
+
+            return Task.CompletedTask;
         }
 
         public static async Task<bool> ShowAcceptFilePopupAsync()
