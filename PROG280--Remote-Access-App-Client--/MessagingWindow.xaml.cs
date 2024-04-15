@@ -102,6 +102,16 @@ namespace PROG280__Remote_Access_App_Client__
             
         }
 
+        public void DisableSendFiles()
+        {
+            btnSendFiles.IsEnabled = false;
+        }
+
+        public void EnableSendFiles()
+        {
+            btnSendFiles.IsEnabled = true;
+        }
+
         private async Task SendFileData(byte[] fileData)
         {
             NetworkConnected client = (NetworkConnected)DataContext;

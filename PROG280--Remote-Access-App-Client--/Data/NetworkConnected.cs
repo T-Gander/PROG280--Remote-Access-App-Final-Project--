@@ -336,6 +336,11 @@ namespace PROG280__Remote_Access_App_Data__
                                 else
                                 {
                                     //Send File Accept
+                                    Application.Current.Dispatcher.Invoke(() =>
+                                    {
+                                        MessagingWindow.DisableSendFiles();
+                                    });
+
                                     await SendDataPacket(MessageType.FileAccept, "N/A");
                                     AcceptReceivingFile = true;
                                     break;
@@ -352,6 +357,12 @@ namespace PROG280__Remote_Access_App_Data__
                             AcceptReceivingFile = false;
 
                             File.WriteAllBytes($"{AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}", fileBytes);
+
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                MessagingWindow.EnableSendFiles();
+                            });
+
 
                             ChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
                             break;
