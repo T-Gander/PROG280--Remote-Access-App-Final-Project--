@@ -320,6 +320,7 @@ namespace PROG280__Remote_Access_App_Data__
                                 {
                                     //Send File Accept
                                     await SendDataPacket(MessageType.FileAccept, "N/A");
+                                    AcceptReceivingFile = true;
                                     break;
                                 }
                             }
