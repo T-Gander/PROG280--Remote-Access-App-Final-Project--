@@ -91,8 +91,6 @@ namespace PROG280__Remote_Access_App_Client__
         {
             NetworkConnected client = (NetworkConnected)DataContext;
 
-            List<byte> fileChunks = new List<byte>();
-
             int totalChunks = (int)Math.Ceiling((double)fileData.Length / (double)1024);
             int chunkIndex = 0;
 
