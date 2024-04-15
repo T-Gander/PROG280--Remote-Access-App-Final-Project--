@@ -63,6 +63,8 @@ namespace PROG280__Remote_Access_App_Client__
 
                 if (ofd != null)
                 {
+                    client.ChatMessages.Add($"Attempting to send file...");
+
                     await client.SendDataPacket(MessageType.FileChunk , ofd.SafeFileName);
 
                     var tcs = new TaskCompletionSource<bool>();
@@ -84,8 +86,13 @@ namespace PROG280__Remote_Access_App_Client__
 
                     if (client.SendingFile)
                     {
+                        client.ChatMessages.Add($"The remote user accepted the file transfer.");
                         await SendFileData(File.ReadAllBytes(ofd.FileName));
                         client.SendingFile = false;
+                    }
+                    else
+                    {
+                        client.ChatMessages.Add($"The remote user denied the file transfer.");
                     }
 
                     btnSendFiles.IsEnabled = true;

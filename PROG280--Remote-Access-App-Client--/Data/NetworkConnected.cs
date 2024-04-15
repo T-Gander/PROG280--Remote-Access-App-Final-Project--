@@ -373,8 +373,9 @@ namespace PROG280__Remote_Access_App_Data__
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 MessagingWindow.EnableSendFiles();
-                                LocalChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
                             });
+
+                            LocalChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
 
                             break;
                     }
