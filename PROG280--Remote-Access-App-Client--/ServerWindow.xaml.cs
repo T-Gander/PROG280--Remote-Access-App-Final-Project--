@@ -100,6 +100,8 @@ namespace PROG280__Remote_Access_App_Client__
         {
             //Client!.ShutDown();
             await LocalMessageEvent?.Invoke("Stopping server...")!;
+            Client!.TcpListenerData!.Stop();
+            Client!.TcpListenerVideo!.Stop();
             ChangeServerState();
         }
 
@@ -136,6 +138,7 @@ namespace PROG280__Remote_Access_App_Client__
                 case "Stop the Server":
                     try
                     {
+
                         await LocalMessageEvent("Server stopped.");
 
                         btnStartServer.Click -= Stop_Click;
@@ -145,7 +148,7 @@ namespace PROG280__Remote_Access_App_Client__
                         btnRequestConnection.IsEnabled = true;
                         txtServerIp.IsEnabled = true;
 
-                        await LocalMessageEvent("Waiting for Action...");
+                        await LocalMessageEvent("Server state successfully changed.");
                     }
                     catch (Exception ex)
                     {
@@ -160,6 +163,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                     btnRequestConnection.IsEnabled = false;
                     txtServerIp.IsEnabled = false;
+                    await LocalMessageEvent("Server state successfully changed.");
                     break;
             }
         }
@@ -298,6 +302,7 @@ namespace PROG280__Remote_Access_App_Client__
             {
                 await LocalMessageEvent(ex.Message);
                 await LocalMessageEvent($"TCP Listener Closed.");
+                await LocalMessageEvent("Waiting for Action...");
             }
         }
 
@@ -306,6 +311,11 @@ namespace PROG280__Remote_Access_App_Client__
             await LocalMessageEvent("Listening...");
             Client!.TcpClientData = await Client!.TcpListenerData!.AcceptTcpClientAsync();
             Client!.TcpClientVideo = await Client!.TcpListenerVideo!.AcceptTcpClientAsync();
+
+           
+
+            Client.TcpListenerData.Stop();
+            Client.TcpListenerVideo.Stop();
 
             await LocalMessageEvent($"Connection Established with {Client!.TcpClientData.Client.RemoteEndPoint}.");
             Client!.IsConnected = true;

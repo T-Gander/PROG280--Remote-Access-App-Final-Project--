@@ -111,12 +111,14 @@ namespace PROG280__Remote_Access_App_Data__
 
         public void CloseConnections()
         {
-            //_messageStream?.Close();
-            //_messageStream?.Dispose();
-            //_videoStream?.Close();
-            //TcpVideoClient?.Close();
-            //_videoStream?.Dispose();
-            //TcpVideoClient?.Dispose();
+            _dataStream?.Close();
+            _videoStream?.Close();
+            TcpClientVideo?.Close();
+            TcpClientData?.Close();
+            _videoStream?.Dispose();
+            TcpClientVideo?.Dispose();
+            TcpClientData?.Dispose();
+            _dataStream?.Dispose();
         }
 
         public static async Task<bool> ShowAcceptFilePopupAsync()
@@ -264,6 +266,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
             catch (Exception ex)
             {
+                IsConnected = false;
                 return null;
             }
         }
@@ -317,7 +320,7 @@ namespace PROG280__Remote_Access_App_Data__
             }
             catch (Exception ex)
             {
-
+                IsConnected = false;
             }
         }
 
