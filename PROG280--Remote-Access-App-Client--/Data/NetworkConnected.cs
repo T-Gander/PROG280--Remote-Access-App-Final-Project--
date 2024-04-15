@@ -337,7 +337,7 @@ namespace PROG280__Remote_Access_App_Data__
                             if (!AcceptReceivingFile)
                             {
                                 ReceivingFileName = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
-                                LocalChatHandler($"The other user is attempting to send file... {ReceivingFileName}");
+                                LocalChatHandler($"The remote user is attempting to send a file... {ReceivingFileName}");
 
                                 bool acceptFile = await ShowAcceptFilePopupAsync();
 
