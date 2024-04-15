@@ -344,8 +344,8 @@ namespace PROG280__Remote_Access_App_Client__
             Client!.TcpClientData = await Client!.TcpListenerData!.AcceptTcpClientAsync();
             Client!.TcpClientVideo = await Client!.TcpListenerVideo!.AcceptTcpClientAsync();
 
-            Client.TcpListenerData.Stop();
-            Client.TcpListenerVideo.Stop();
+            //Client.TcpListenerData.Stop();
+            //Client.TcpListenerVideo.Stop();
 
             await Application.Current.Dispatcher.Invoke(async () =>
             {
@@ -362,51 +362,61 @@ namespace PROG280__Remote_Access_App_Client__
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
         {
-            Client = new();
-            await LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
-
             try
             {
-                Client!.TcpClientData = new TcpClient(RemoteIPAddress, Port);
-                Client!.TcpClientVideo = new TcpClient(RemoteIPAddress, Port + 1);
+                Client = new();
+                await LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
+
+                try
+                {
+                    Client!.TcpClientData = new TcpClient(RemoteIPAddress, Port);
+                    Client!.TcpClientVideo = new TcpClient(RemoteIPAddress, Port + 1);
+                }
+                catch
+                {
+                    await LocalMessageEvent($"Connection Refused.");
+                    return;
+                }
+
+                Client!.IsConnected = true;
+
+                await LocalMessageEvent($"Connected to {RemoteIPAddress}");
+
+                var tcs = new TaskCompletionSource<object?>();
+
+                // Use a TaskCompletionSource to create a task that completes when the RemoteWindow is closed
+
+                void RemoteWindow_Closed(object sender, EventArgs e)
+                {
+                    tcs.TrySetResult(null); // Signal that the task is completed
+                }
+
+                Client.RemoteWindow = new RemoteWindow(Client);
+
+                Client.RemoteWindow.Closed += RemoteWindow_Closed;
+                Client.RemoteWindow.Show();
+
+                _messagingWindow = new MessagingWindow(Client);
+                _messagingWindow.Show();
+
+                // Wait asynchronously for the RemoteWindow to be closed
+                await tcs.Task;
+
+                if (_messagingWindow != null)
+                {
+                    _messagingWindow.Close();
+                }
+
+                //Send disconnect packet
+
+                await Client.CloseConnections();
+                await LocalMessageEvent("Connection closed.");
             }
-            catch
+            catch (Exception ex)
             {
-                await LocalMessageEvent($"Connection Refused.");
-                return;
+
             }
-
-            Client!.IsConnected = true;
-
-            await LocalMessageEvent($"Connected to {RemoteIPAddress}");
-
-            var tcs = new TaskCompletionSource<object?>();
-
-            // Use a TaskCompletionSource to create a task that completes when the RemoteWindow is closed
-
-            void RemoteWindow_Closed(object sender, EventArgs e)
-            {
-                tcs.TrySetResult(null); // Signal that the task is completed
-            }
-
-            Client.RemoteWindow = new RemoteWindow(Client);
-
-            Client.RemoteWindow.Closed += RemoteWindow_Closed;
-            Client.RemoteWindow.Show();
-
-            _messagingWindow = new MessagingWindow(Client);
-            _messagingWindow.Show();
-
-            // Wait asynchronously for the RemoteWindow to be closed
-            await tcs.Task;
-
-            if (_messagingWindow != null)
-            {
-                _messagingWindow.Close();
-            }
-
-            Client.CloseConnections();
-            await LocalMessageEvent("Connection closed.");
+            
         }
 
         private async void btnTest_Click(object sender, RoutedEventArgs e)
