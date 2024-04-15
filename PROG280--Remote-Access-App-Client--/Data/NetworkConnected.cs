@@ -289,7 +289,7 @@ namespace PROG280__Remote_Access_App_Data__
 
                     if (packet == null)
                     {
-                        return;
+                        break;
                     }
 
                     switch (packet.ContentType)
@@ -314,13 +314,13 @@ namespace PROG280__Remote_Access_App_Data__
 
                                 if (!acceptFile)
                                 {
-                                    return;
+                                    break;
                                 }
                                 else
                                 {
                                     //Send File Accept
                                     await SendDataPacket(MessageType.FileAccept, "N/A");
-                                    return;
+                                    break;
                                 }
                             }
 
