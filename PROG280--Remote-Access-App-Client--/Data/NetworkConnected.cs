@@ -109,7 +109,7 @@ namespace PROG280__Remote_Access_App_Data__
             return Task.CompletedTask;
         }
 
-        public void CloseConnections()
+        public async Task CloseConnections()
         {
             _dataStream?.Close();
             _videoStream?.Close();

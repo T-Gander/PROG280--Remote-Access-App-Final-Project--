@@ -100,9 +100,8 @@ namespace PROG280__Remote_Access_App_Client__
         {
             //Client!.ShutDown();
             await LocalMessageEvent?.Invoke("Stopping server...")!;
-            Client!.TcpListenerData!.Stop();
-            Client!.TcpListenerVideo!.Stop();
-            ChangeServerState();
+            await Client!.CloseConnections();
+            await ChangeServerState();
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
@@ -115,30 +114,29 @@ namespace PROG280__Remote_Access_App_Client__
             _logWindow.Show();
         }
 
-        private void StartServer()
+        private async Task StartServer()
         {
             Client = new();
 
             btnRequestConnection.IsEnabled = false;
             txtServerIp.IsEnabled = false;
 
-            LocalMessageEvent("Starting server...");
+            await LocalMessageEvent("Starting server...");
             Client!.TcpListenerData = new(IPAddress.Any, Port);
             Client.TcpListenerData.Start();
             Client!.TcpListenerVideo = new(IPAddress.Any, Port+1);
             Client.TcpListenerVideo.Start();
 
-            LocalMessageEvent("Server started!");
+            await LocalMessageEvent("Server started!");
         }
 
-        private async void ChangeServerState()
+        private async Task ChangeServerState()
         {
             switch (btnStartServer.Content)
             {
                 case "Stop the Server":
                     try
                     {
-
                         await LocalMessageEvent("Server stopped.");
 
                         btnStartServer.Click -= Stop_Click;
@@ -230,9 +228,9 @@ namespace PROG280__Remote_Access_App_Client__
         {
             try
             {
-                ChangeServerState();
+                await ChangeServerState();
 
-                StartServer();
+                await StartServer();
 
                 await LocalMessageEvent($"Listening on port {Port}.");
 
@@ -311,8 +309,6 @@ namespace PROG280__Remote_Access_App_Client__
             await LocalMessageEvent("Listening...");
             Client!.TcpClientData = await Client!.TcpListenerData!.AcceptTcpClientAsync();
             Client!.TcpClientVideo = await Client!.TcpListenerVideo!.AcceptTcpClientAsync();
-
-           
 
             Client.TcpListenerData.Stop();
             Client.TcpListenerVideo.Stop();
