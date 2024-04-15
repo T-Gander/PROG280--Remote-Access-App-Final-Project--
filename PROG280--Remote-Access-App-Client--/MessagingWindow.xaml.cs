@@ -3,6 +3,7 @@ using PROG280__Remote_Access_App_Data__;
 using PROG2800__Remote_Access_App_Client__.MessagingWindowComponents;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -53,6 +54,7 @@ namespace PROG280__Remote_Access_App_Client__
         private async void btnSendFiles_Click(object sender, RoutedEventArgs e)
         {
             NetworkConnected client = (NetworkConnected)DataContext;
+            btnSendFiles.IsEnabled = false;
 
             try
             {
@@ -61,16 +63,15 @@ namespace PROG280__Remote_Access_App_Client__
 
                 if (ofd != null)
                 {
-                    byte[] fileData = File.ReadAllBytes(ofd.FileName);
+                    await client.SendDataPacket(MessageType.FileChunk , ofd.SafeFileName);
 
-                    //var sendFile = await client.AskToSendFile(fileData);
+                    await Task.WhenAny(Task.FromResult(client.SendingFile), Task.Delay(5000));
 
-                    //btnSendFiles.IsEnabled = false;
-
-                    //if (sendFile)
-                    //{
-                    //    await _AppType.ReceiveFiles();
-                    //}
+                    if (client.SendingFile)
+                    {
+                        await SendFileData(File.ReadAllBytes(ofd.FileName));
+                        client.SendingFile = false;
+                    }
 
                     btnSendFiles.IsEnabled = true;
                 }
@@ -84,6 +85,30 @@ namespace PROG280__Remote_Access_App_Client__
                 //Something bad happened
             }
             
+        }
+
+        private async Task SendFileData(byte[] fileData)
+        {
+            NetworkConnected client = (NetworkConnected)DataContext;
+
+            List<byte> fileChunks = new List<byte>();
+
+            int totalChunks = (int)Math.Ceiling((double)fileData.Length / (double)1024);
+            int chunkIndex = 0;
+
+            while (chunkIndex != totalChunks)
+            {
+                int offset = chunkIndex * client!.ChunkSize;
+                int length = Math.Min(client!.ChunkSize, fileData.Length - offset);
+                byte[] chunk = new byte[client!.ChunkSize];
+                Buffer.BlockCopy(fileData, offset, chunk, 0, length);
+
+                // Serialize packet and send
+                await client!.SendDataPacket(MessageType.FileChunk, chunk);
+                chunkIndex++;
+            }
+
+            await client!.SendDataPacket(MessageType.FileEnd, new byte[client.ChunkSize]);
         }
 
         private async void btnSendMessage_Click(object sender, RoutedEventArgs e)

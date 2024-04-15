@@ -34,8 +34,6 @@ namespace PROG280__Remote_Access_App_Client__
     {
         public enum FrameRate { Thirty = 34, Sixty = 17, OneTwenty = 9 }
 
-        private MessagingWindow? _messagingWindow;
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
@@ -355,8 +353,8 @@ namespace PROG280__Remote_Access_App_Client__
             Client!.IsConnected = true;
             await Application.Current.Dispatcher.Invoke(async () =>
             {
-                _messagingWindow = new MessagingWindow(Client);
-                _messagingWindow.Show();
+                Client.MessagingWindow = new MessagingWindow(Client);
+                Client.MessagingWindow.Show();
             });
         }
 
@@ -396,15 +394,15 @@ namespace PROG280__Remote_Access_App_Client__
                 Client.RemoteWindow.Closed += RemoteWindow_Closed;
                 Client.RemoteWindow.Show();
 
-                _messagingWindow = new MessagingWindow(Client);
-                _messagingWindow.Show();
+                Client.MessagingWindow = new MessagingWindow(Client);
+                Client.MessagingWindow.Show();
 
                 // Wait asynchronously for the RemoteWindow to be closed
                 await tcs.Task;
 
-                if (_messagingWindow != null)
+                if (Client.MessagingWindow != null)
                 {
-                    _messagingWindow.Close();
+                    Client.MessagingWindow.Close();
                 }
 
                 //Send disconnect packet
@@ -418,14 +416,5 @@ namespace PROG280__Remote_Access_App_Client__
             }
             
         }
-
-        private async void btnTest_Click(object sender, RoutedEventArgs e)
-        {
-            RemoteWindow remoteWindow = new RemoteWindow(Client);
-            remoteWindow.Show();
-            
-        }
-
-         //Tied to fps
     }
 }

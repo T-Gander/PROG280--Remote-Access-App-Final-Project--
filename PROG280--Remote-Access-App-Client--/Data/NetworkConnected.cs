@@ -29,6 +29,7 @@ namespace PROG280__Remote_Access_App_Data__
     public class NetworkConnected : INotifyPropertyChanged
     {
         public RemoteWindow RemoteWindow { get; set; }
+        public MessagingWindow MessagingWindow { get; set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -42,7 +43,9 @@ namespace PROG280__Remote_Access_App_Data__
         public delegate void ChatDelegate(string message);
         public event ChatDelegate ChatHandler;
 
-        public bool ReceivingFile = false;
+        public bool AcceptReceivingFile = false;
+        public bool SendingFile = false;
+
         public string ReceivingFileName = "";
 
         public bool FrameReady = false;
@@ -291,15 +294,33 @@ namespace PROG280__Remote_Access_App_Data__
 
                     switch (packet.ContentType)
                     {
+                        case MessageType.FileAccept:
+                            SendingFile = true;
+                            break;
+
+
                         case MessageType.Message:
                             string message = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
                             ChatHandler(message);
                             break;
 
                         case MessageType.FileChunk:
-                            if (!ReceivingFile)
+                            if (!AcceptReceivingFile)
                             {
                                 ReceivingFileName = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
+                                ChatHandler($"The other user is attempting to send file... {ReceivingFileName}");
+
+                                bool acceptFile = await ShowAcceptFilePopupAsync();
+
+                                if (!acceptFile)
+                                {
+                                    return;
+                                }
+                                else
+                                {
+                                    //Send File Accept
+                                    await SendDataPacket(MessageType.FileAccept, "N/A");
+                                }
                             }
 
                             byte[] fileChunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
@@ -307,13 +328,13 @@ namespace PROG280__Remote_Access_App_Data__
                             break;
 
                         case MessageType.FileEnd:
-                            ReceivingFile = false;
                             byte[] fileBytes = fileChunks.ToArray();
                             fileChunks.Clear();
+                            AcceptReceivingFile = false;
 
                             File.WriteAllBytes($"{AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}", fileBytes);
 
-                            ChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName} from remote computer.");
+                            ChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
                             break;
                     }
                 }
