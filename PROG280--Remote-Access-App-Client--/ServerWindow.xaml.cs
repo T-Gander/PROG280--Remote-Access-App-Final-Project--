@@ -353,8 +353,11 @@ namespace PROG280__Remote_Access_App_Client__
             });
 
             Client!.IsConnected = true;
-            _messagingWindow = new MessagingWindow(Client);
-            _messagingWindow.Show();
+            await Application.Current.Dispatcher.Invoke(async () =>
+            {
+                _messagingWindow = new MessagingWindow(Client);
+                _messagingWindow.Show();
+            });
         }
 
         private async void btnRequestConnection_Click(object sender, RoutedEventArgs e)
