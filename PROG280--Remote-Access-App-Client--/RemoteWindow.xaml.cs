@@ -48,27 +48,29 @@ namespace PROG280__Remote_Access_App_Client__
         {
             try
             {
-                while (true)
+                bool continueHandling = true;
+
+                while (continueHandling)
                 {
-                    var timeout = Task.Run(async () =>
+                    await Dispatcher.Invoke(async () =>
                     {
-                        await Task.Delay(5000);
-                    });
-
-                    var videoFeed = Task.Run(async () =>
-                    {
-                        await Dispatcher.Invoke(async () =>
+                        var timeout = Task.Run(async () =>
                         {
-                            _RemoteWindowDataContext.Frame = await _Client.ReceiveVideoPackets();
+                            await Task.Delay(5000);
                         });
+
+                        var videoFeed = Task.Run(() =>
+                        {
+                            _RemoteWindowDataContext.Frame = _Client.ReceiveVideoPackets().Result;
+                        });
+
+                        await Task.WhenAny(timeout, videoFeed);
+
+                        if (timeout.IsCompleted)
+                        {
+                            continueHandling = false;
+                        }
                     });
-
-                    await Task.WhenAny(timeout, videoFeed);
-
-                    if (timeout.IsCompleted)
-                    {
-                        break;
-                    }
                 }
 
                 MessageBox.Show("No Video feed, remote user may have disconnected. \n \n Please try reconnecting.","Timeout reached",MessageBoxButton.OK, MessageBoxImage.Error);
