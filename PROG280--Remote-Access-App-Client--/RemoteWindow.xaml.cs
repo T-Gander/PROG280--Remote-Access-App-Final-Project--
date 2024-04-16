@@ -48,10 +48,13 @@ namespace PROG280__Remote_Access_App_Client__
         {
             try
             {
-                await Dispatcher.Invoke(async () =>
+                while (true)
                 {
-                    _RemoteWindowDataContext.Frame = await _Client.ReceiveVideoPackets();
-                });
+                    await Dispatcher.Invoke(async () =>
+                    {
+                        _RemoteWindowDataContext.Frame = await _Client.ReceiveVideoPackets();
+                    });
+                }
             }
             catch (Exception ex)
             {
