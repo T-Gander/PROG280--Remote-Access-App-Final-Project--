@@ -64,7 +64,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                         if (!timeout.IsCompleted)
                         {
-                            Dispatcher.Invoke(() =>
+                            await Dispatcher.Invoke(async () =>
                             {
                                 _RemoteWindowDataContext.Frame = frame;
                             });
