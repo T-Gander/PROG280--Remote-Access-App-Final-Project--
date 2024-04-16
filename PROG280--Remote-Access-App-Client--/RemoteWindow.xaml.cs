@@ -103,8 +103,12 @@ namespace PROG280__Remote_Access_App_Client__
 
             //double widthImageDiff = Width - frame.ActualWidth;
             //double heightImageDiff = Height - frame.ActualHeight;
-            
-            
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
         }
     }
 }
