@@ -60,10 +60,15 @@ namespace PROG280__Remote_Access_App_Client__
 
                     var videoFeed = Task.Run(async () =>
                     {
-                        await Dispatcher.Invoke(async () =>
+                        BitmapImage? frame = await _Client.ReceiveVideoPackets();
+
+                        if (!timeout.IsCompleted)
                         {
-                            _RemoteWindowDataContext.Frame = await _Client.ReceiveVideoPackets();
-                        });
+                            Dispatcher.Invoke(() =>
+                            {
+                                _RemoteWindowDataContext.Frame = frame;
+                            });
+                        }
                     });
 
                     await Task.WhenAny(timeout, videoFeed);
