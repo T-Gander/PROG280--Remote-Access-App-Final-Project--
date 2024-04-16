@@ -58,7 +58,12 @@ namespace PROG280__Remote_Access_App_Client__
                         await Task.Delay(5000);
                     });
 
-                    BitmapImage? frame = _Client.ReceiveVideoPackets().Result;
+                    var frameTask = Task.Run(() => 
+                    {
+                        BitmapImage? frame = _Client.ReceiveVideoPackets().Result;
+                    });
+
+                    await Task.WhenAny(timeout, frameTask);
 
                     if (!timeout.IsCompleted)
                     {
@@ -67,8 +72,7 @@ namespace PROG280__Remote_Access_App_Client__
                             _RemoteWindowDataContext.Frame = frame;
                         });
                     }
-
-                    if (timeout.IsCompleted)
+                    else
                     {
                         continueHandling = false;
                     }
