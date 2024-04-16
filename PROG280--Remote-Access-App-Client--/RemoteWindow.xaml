@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PROG280__Remote_Access_App_Client__"
         mc:Ignorable="d"
         Title="Remote Window" Height="800" Width="1200">
-    <Grid Margin="10">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
