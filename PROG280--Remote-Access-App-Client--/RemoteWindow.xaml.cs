@@ -58,20 +58,15 @@ namespace PROG280__Remote_Access_App_Client__
                         await Task.Delay(5000);
                     });
 
-                    BitmapImage? frame = await _Client.ReceiveVideoPackets();
+                    BitmapImage? frame = _Client.ReceiveVideoPackets().Result;
 
-                    var videoFeed = Task.Run(async () =>
+                    if (!timeout.IsCompleted)
                     {
-                        if (!timeout.IsCompleted)
+                        await Dispatcher.Invoke(async () =>
                         {
-                            await Dispatcher.Invoke(async () =>
-                            {
-                                _RemoteWindowDataContext.Frame = frame;
-                            });
-                        }
-                    });
-
-                    await Task.WhenAny(timeout, videoFeed);
+                            _RemoteWindowDataContext.Frame = frame;
+                        });
+                    }
 
                     if (timeout.IsCompleted)
                     {
