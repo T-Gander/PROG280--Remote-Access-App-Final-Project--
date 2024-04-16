@@ -23,6 +23,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static PROG280__Remote_Access_App_Client__.ServerWindow;
 
 namespace PROG280__Remote_Access_App_Client__
 {
@@ -54,6 +55,8 @@ namespace PROG280__Remote_Access_App_Client__
                     {
                         _RemoteWindowDataContext.Frame = await _Client.ReceiveVideoPackets();
                     });
+
+                    await Task.Delay((int)FrameRate.Sixty);
                 }
             }
             catch (Exception ex)
