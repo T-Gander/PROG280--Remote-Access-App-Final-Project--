@@ -58,6 +58,7 @@ namespace PROG280__Remote_Access_App_Data__
         public bool AcceptReceivingFile = false;
 
         public event EventHandler SendingFileChanged;
+        public event EventHandler AllowRemoteControlChanged;
 
         private bool _sendingFile;
         public bool SendingFile
@@ -70,9 +71,25 @@ namespace PROG280__Remote_Access_App_Data__
             }
         }
 
+        private bool _allowRemoteControl;
+        public bool AllowRemoteControl
+        {
+            get { return _allowRemoteControl; }
+            set
+            {
+                _allowRemoteControl = value;
+                OnAllowRemoteControlChanged();
+            }
+        }
+
         protected virtual void OnSendingFileChanged()
         {
             SendingFileChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnAllowRemoteControlChanged()
+        {
+            AllowRemoteControlChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public string ReceivingFileName = "";
@@ -155,11 +172,11 @@ namespace PROG280__Remote_Access_App_Data__
             return Task.CompletedTask;
         }
 
-        public static async Task<bool> ShowAcceptFilePopupAsync()
+        public static async Task<bool> ShowAcceptPopupAsync(string message, string caption)
         {
             // Show a dialog box asking the user whether to accept the file transfer
             MessageBoxResult result = await Task.Run(() =>
-                MessageBox.Show("Do you want to accept the file transfer?", "File Transfer", MessageBoxButton.YesNo));
+                MessageBox.Show(message, caption, MessageBoxButton.YesNo));
 
             // Return true if the user clicked Yes, false otherwise
             return result == MessageBoxResult.Yes;
@@ -350,7 +367,7 @@ namespace PROG280__Remote_Access_App_Data__
                                 ReceivingFileName = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
                                 LocalChatHandler($"The remote user is attempting to send a file... {ReceivingFileName}");
 
-                                bool acceptFile = await ShowAcceptFilePopupAsync();
+                                bool acceptFile = await ShowAcceptPopupAsync("Do you want to accept the file transfer?", "File Transfer");
 
                                 if (!acceptFile)
                                 {
@@ -392,14 +409,23 @@ namespace PROG280__Remote_Access_App_Data__
                             break;
 
                         case MessageType.MouseMove:
-                            MouseData mouseData = JsonConvert.DeserializeObject<MouseData>(packet.Payload!)!;
+                            //Popup to request control, set bool to continue to allow control, and then if a button is pressed control is released.
+                            if (!AllowRemoteControl)
+                            {
+                                AllowRemoteControl = await ShowAcceptPopupAsync("Do you want to accept remote control?", "Remote Control");
+                            } 
+                            else
+                            {
+                                MouseData mouseData = JsonConvert.DeserializeObject<MouseData>(packet.Payload!)!;
 
-                            var a = x * mouseData.MouseLocation.X;
-                            var b = y * mouseData.MouseLocation.Y;
+                                var a = x * mouseData.MouseLocation.X;
+                                var b = y * mouseData.MouseLocation.Y;
 
-                            System.Windows.Point convertedLocation = new System.Windows.Point(a, b);
+                                System.Windows.Point convertedLocation = new System.Windows.Point(a, b);
 
-                            RemoteControlHandler(convertedLocation, mouseData.MouseButton);
+                                RemoteControlHandler(convertedLocation, mouseData.MouseButton);
+                            }
+
                             break;
                     }
                 }

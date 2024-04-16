@@ -24,6 +24,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions >
-        <Image x:Name="frame" Grid.ColumnSpan="12" Source="{Binding Path=Frame}" MouseDown="frame_MouseDown" Stretch="Fill" />
+        <Image x:Name="frame" Grid.ColumnSpan="12" Source="{Binding Path=Frame}" Stretch="Fill" />
     </Grid>
 </Window>

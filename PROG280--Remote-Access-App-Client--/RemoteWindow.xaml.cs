@@ -35,14 +35,13 @@ namespace PROG280__Remote_Access_App_Client__
 
         private RemoteWindowDataContext _RemoteWindowDataContext = new();
 
-        
-
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
             DataContext = _RemoteWindowDataContext;
             _Client = client;
             Task.Run(HandlePackets);
+            frame.MouseDown += Frame_MouseDown;
         }
 
         private async void HandlePackets()
@@ -63,14 +62,8 @@ namespace PROG280__Remote_Access_App_Client__
             }
         }
 
-        private async void frame_MouseDown(object sender, MouseButtonEventArgs mouseEvent)
+        private async void Frame_MouseDown(object sender, MouseButtonEventArgs mouseEvent)
         {
-            //Send a packet to server and set its mouse location.
-            //Figure out where in the window you clicked, and if needed where on the image
-
-            //double widthImageDiff = Width - frame.ActualWidth;
-            //double heightImageDiff = Height - frame.ActualHeight;
-            
             System.Windows.Point mousePosition = mouseEvent.GetPosition(this);
 
             double xRatio = (double)mousePosition.X / (double)frame.ActualWidth;
@@ -90,6 +83,14 @@ namespace PROG280__Remote_Access_App_Client__
             {
                 await _Client.SendDataPacket(Packet.MessageType.MouseMove, mouseData);
             }
+
+            //Send a packet to server and set its mouse location.
+            //Figure out where in the window you clicked, and if needed where on the image
+
+            //double widthImageDiff = Width - frame.ActualWidth;
+            //double heightImageDiff = Height - frame.ActualHeight;
+            
+            
         }
     }
 }
