@@ -175,6 +175,7 @@ namespace PROG280__Remote_Access_App_Data__
             Application.Current.Dispatcher.Invoke(() =>
             {
                 MouseSimulator.SimulateMousePress((short)mouseEvent.X, (short)mouseEvent.Y, button);
+                MouseSimulator.SimulateMouseRelease((short)mouseEvent.X, (short)mouseEvent.Y, button);
             });
         }
 
