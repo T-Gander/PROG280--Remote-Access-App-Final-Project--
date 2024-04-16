@@ -63,7 +63,7 @@ namespace PROG280__Remote_Access_App_Client__
                         }
                         else
                         {
-                            return;
+                            continueHandling = false;
                         }
                     });
                 }
