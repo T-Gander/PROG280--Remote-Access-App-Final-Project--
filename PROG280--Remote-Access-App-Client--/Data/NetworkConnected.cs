@@ -327,6 +327,10 @@ namespace PROG280__Remote_Access_App_Data__
                             SendingFile = true;
                             break;
 
+                        case MessageType.FileDeny:
+                            SendingFile = false;
+                            break;
+
 
                         case MessageType.Message:
                             string message = JsonConvert.DeserializeObject<string>(packet.Payload!)!;
@@ -343,6 +347,7 @@ namespace PROG280__Remote_Access_App_Data__
 
                                 if (!acceptFile)
                                 {
+                                    await SendDataPacket(MessageType.FileDeny, "N/A");
                                     break;
                                 }
                                 else
