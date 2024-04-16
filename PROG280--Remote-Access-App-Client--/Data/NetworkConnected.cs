@@ -412,7 +412,7 @@ namespace PROG280__Remote_Access_App_Data__
                             //Popup to request control, set bool to continue to allow control, and then if a button is pressed control is released.
                             if (!AllowRemoteControl)
                             {
-                                AllowRemoteControl = await ShowAcceptPopupAsync("Do you want to accept remote control? \n THE ONLY WAY TO REVOKE CONTROL IS TO USE CTRL+ALT+DELETE AND LOG OUT.", "Remote Control");
+                                AllowRemoteControl = await ShowAcceptPopupAsync("Do you want to accept remote control? \n \n THE ONLY WAY TO REVOKE CONTROL IS TO USE CTRL+ALT+DELETE AND LOG OUT.", "Remote Control");
                             } 
                             else
                             {
