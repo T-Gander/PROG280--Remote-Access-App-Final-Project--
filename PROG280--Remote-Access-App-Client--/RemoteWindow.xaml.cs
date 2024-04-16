@@ -68,8 +68,8 @@ namespace PROG280__Remote_Access_App_Client__
 
             System.Windows.Point mousePosition = mouseEvent.GetPosition(this);
 
-            double xRatio = (double)mousePosition.X / (double)frame.Width;
-            double yRatio = (double)mousePosition.Y / (double)frame.Height;
+            double xRatio = (double)mousePosition.X / (double)frame.ActualWidth;
+            double yRatio = (double)mousePosition.Y / (double)frame.ActualHeight;
 
             System.Windows.Point ratioPoint = new System.Windows.Point(xRatio, yRatio);
 
