@@ -392,9 +392,7 @@ namespace PROG280__Remote_Access_App_Data__
                             break;
 
                         case MessageType.MouseMove:
-
                             MouseData mouseData = JsonConvert.DeserializeObject<MouseData>(packet.Payload!)!;
-                            System.Windows.Point location = JsonConvert.DeserializeObject<System.Windows.Point>(packet.Payload!)!;
 
                             var a = x * mouseData.MouseLocation.X;
                             var b = y * mouseData.MouseLocation.Y;
