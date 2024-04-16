@@ -284,41 +284,39 @@ namespace PROG280__Remote_Access_App_Data__
         {
             try
             {
-                while (true)
+                _videoStream = TcpClientVideo!.GetStream();
+
+                byte[] buffer = new byte[PacketSize];
+                int bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
+                var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;
+
+                if(packet != null)
                 {
-                    _videoStream = TcpClientVideo!.GetStream();
-
-                    byte[] buffer = new byte[PacketSize];
-                    int bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
-                    var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;
-
-                    if(packet != null)
+                    switch (packet.ContentType)
                     {
-                        switch (packet.ContentType)
-                        {
-                            case MessageType.FrameChunk:
-                                byte[] chunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
-                                ChunkHandler(chunk);
-                                break;
+                        case MessageType.FrameChunk:
+                            byte[] chunk = JsonConvert.DeserializeObject<byte[]>(packet.Payload!)!;
+                            ChunkHandler(chunk);
+                            break;
 
-                            case MessageType.FrameEnd:
-                                byte[] bitmapBytes = frameChunks.ToArray();
-                                frameChunks.Clear();
-                                BitmapImage? frame = new();
+                        case MessageType.FrameEnd:
+                            byte[] bitmapBytes = frameChunks.ToArray();
+                            frameChunks.Clear();
+                            BitmapImage? frame = new();
 
-                                using (MemoryStream mstream = new(bitmapBytes))
-                                {
-                                    frame = new BitmapImage();
-                                    frame.BeginInit();
-                                    frame.StreamSource = mstream;
-                                    frame.CacheOption = BitmapCacheOption.OnLoad;
-                                    frame.EndInit();
-                                }
-                                return frame;
-                        }
+                            using (MemoryStream mstream = new(bitmapBytes))
+                            {
+                                frame = new BitmapImage();
+                                frame.BeginInit();
+                                frame.StreamSource = mstream;
+                                frame.CacheOption = BitmapCacheOption.OnLoad;
+                                frame.EndInit();
+                            }
+                            return frame;
                     }
                 }
+                return null;
             }
             catch (Exception ex)
             {
