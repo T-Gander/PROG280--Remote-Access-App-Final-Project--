@@ -66,6 +66,9 @@ namespace PROG280__Remote_Access_App_Client__
             //Send a packet to server and set its mouse location.
             //Figure out where in the window you clicked, and if needed where on the image
 
+            double heightImageDiff = Height - frame.ActualHeight;
+            double widthImageDiff = Width - frame.ActualWidth;
+
             System.Windows.Point mousePosition = mouseEvent.GetPosition(this);
 
             double xRatio = (double)mousePosition.X / (double)frame.ActualWidth;
