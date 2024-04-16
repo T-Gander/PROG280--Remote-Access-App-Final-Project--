@@ -60,7 +60,7 @@ namespace PROG280__Remote_Access_App_Client__
 
         private void frame_Click(object sender, RoutedEventArgs e)
         {
-            DisplayName _displayNameWindow = new((NetworkConnected)DataContext);
+            DisplayName _displayNameWindow = new();
             _displayNameWindow.ShowDialog();
         }
     }

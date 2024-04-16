@@ -20,10 +20,9 @@ namespace PROG2800__Remote_Access_App_Client__.MessagingWindowComponents
     /// </summary>
     public partial class DisplayName : Window
     {
-        public DisplayName(NetworkConnected appType)
+        public DisplayName()
         {
             InitializeComponent();
-            DataContext = appType;
         }
     }
 }
