@@ -33,18 +33,7 @@ namespace PROG280__Remote_Access_App_Client__
             Task.Run(client.ReceiveDataPackets);
             //AskForDisplayName();
         }
-
-        private void AskForDisplayName()
-        {
-            DisplayName _displayNameWindow = new((NetworkConnected)DataContext);
-            _displayNameWindow.ShowDialog();
-        }
-
-        //A way of sending files for the Client.
-
         //A way to control the server PC.
-
-        
 
         private void btnRequestControl_Click(object sender, RoutedEventArgs e)
         {
