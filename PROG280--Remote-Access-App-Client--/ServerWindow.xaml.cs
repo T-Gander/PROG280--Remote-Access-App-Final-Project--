@@ -169,6 +169,7 @@ namespace PROG280__Remote_Access_App_Client__
             btnStartServer.IsEnabled = false;
             btnRequestConnection.IsEnabled = false;
             txtServerIp.IsEnabled = false;
+            txtChatName.IsEnabled = false;
 
             return Task.CompletedTask;
         }
@@ -178,6 +179,7 @@ namespace PROG280__Remote_Access_App_Client__
             btnStartServer.IsEnabled = true;
             btnRequestConnection.IsEnabled = true;
             txtServerIp.IsEnabled = true;
+            txtChatName.IsEnabled = true;
 
             return Task.CompletedTask;
         }
