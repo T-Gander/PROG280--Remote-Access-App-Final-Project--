@@ -24,12 +24,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions >
-        <Button x:Name="frame"  Grid.ColumnSpan="12" Click="frame_Click">
-            <Button.Template>
-                <ControlTemplate TargetType="Button">
-                    <Image Source="{Binding Path=Frame}"></Image>
-                </ControlTemplate>
-            </Button.Template>
-        </Button>
+        <Image x:Name="frame" Grid.ColumnSpan="12" Source="{Binding Path=Frame}" MouseDown="frame_MouseDown"/>
     </Grid>
 </Window>

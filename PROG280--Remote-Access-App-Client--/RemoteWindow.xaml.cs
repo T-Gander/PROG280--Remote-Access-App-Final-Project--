@@ -61,9 +61,7 @@ namespace PROG280__Remote_Access_App_Client__
             }
         }
 
-
-
-        private async void frame_Click(object sender, MouseButtonEventArgs mouseEvent)
+        private async void frame_MouseDown(object sender, MouseButtonEventArgs mouseEvent)
         {
             //Send a packet to server and set its mouse location.
             //Figure out where in the window you clicked, and if needed where on the image
