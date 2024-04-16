@@ -50,10 +50,9 @@ namespace PROG280__Remote_Access_App_Client__
             {
                 while (true)
                 {
-                    var timeout = Task.Run(() =>
+                    var timeout = Task.Run(async () =>
                     {
-                        Task.Delay(5000);
-                        return;
+                        await Task.Delay(5000);
                     });
 
                     var videoFeed = Task.Run(async () =>
@@ -62,7 +61,6 @@ namespace PROG280__Remote_Access_App_Client__
                         {
                             _RemoteWindowDataContext.Frame = await _Client.ReceiveVideoPackets();
                         });
-                        return;
                     });
 
                     await Task.WhenAny(timeout, videoFeed);
