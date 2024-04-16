@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PROG280__Remote_Access_App_Data__;
+using PROG2800__Remote_Access_App_Client__.MessagingWindowComponents;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -55,6 +56,12 @@ namespace PROG280__Remote_Access_App_Client__
             {
                 //Something bad happened
             }
+        }
+
+        private void frame_Click(object sender, RoutedEventArgs e)
+        {
+            DisplayName _displayNameWindow = new((NetworkConnected)DataContext);
+            _displayNameWindow.ShowDialog();
         }
     }
 }
