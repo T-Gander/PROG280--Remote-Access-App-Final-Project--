@@ -23,6 +23,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace PROG280__Remote_Access_App_Client__
 {
@@ -52,25 +53,25 @@ namespace PROG280__Remote_Access_App_Client__
 
                 while (continueHandling)
                 {
-                    await Dispatcher.Invoke(async () =>
+                    var timeout = Task.Run(async () =>
                     {
-                        var timeout = Task.Run(async () =>
-                        {
-                            await Task.Delay(5000);
-                        });
-
-                        var videoFeed = Task.Run(() =>
-                        {
-                            _RemoteWindowDataContext.Frame = _Client.ReceiveVideoPackets().Result;
-                        });
-
-                        await Task.WhenAny(timeout, videoFeed);
-
-                        if (timeout.IsCompleted)
-                        {
-                            continueHandling = false;
-                        }
+                        await Task.Delay(5000);
                     });
+
+                    var videoFeed = Task.Run(async () =>
+                    {
+                        await Dispatcher.Invoke(async () =>
+                        {
+                            _RemoteWindowDataContext.Frame = await _Client.ReceiveVideoPackets();
+                        });
+                    });
+
+                    await Task.WhenAny(timeout, videoFeed);
+
+                    if (timeout.IsCompleted)
+                    {
+                        continueHandling = false;
+                    }
                 }
 
                 MessageBox.Show("No Video feed, remote user may have disconnected. \n \n Please try reconnecting.","Timeout reached",MessageBoxButton.OK, MessageBoxImage.Error);
