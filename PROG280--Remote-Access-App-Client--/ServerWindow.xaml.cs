@@ -51,6 +51,7 @@ namespace PROG280__Remote_Access_App_Client__
                 return RetreiveLocalIP().Result;
             }
         }
+
         public int Port
         {
             get
@@ -75,6 +76,8 @@ namespace PROG280__Remote_Access_App_Client__
 
         public string RemoteIPAddress { get; set; }
 
+        public string ChatName { get; set; } = "Lazy User";
+
         public delegate Task LocalMessageDelegate(string message);
         public event LocalMessageDelegate LocalMessageEvent;
 
@@ -90,7 +93,6 @@ namespace PROG280__Remote_Access_App_Client__
         private async Task ServerStatusUpdate(string message)
         {
             lblAppStatus.Text = message;
-
             await Task.Delay(400);
         }
 
@@ -190,7 +192,7 @@ namespace PROG280__Remote_Access_App_Client__
                         btnStartServer.Click -= Stop_Click;
                         btnStartServer.Click += btnStartServer_Click;
                         btnStartServer.Content = "Start a Server";
-
+                        txtChatName.IsEnabled = true;
                     }
                     catch (Exception ex)
                     {
@@ -204,7 +206,7 @@ namespace PROG280__Remote_Access_App_Client__
                         btnStartServer.Click -= btnStartServer_Click;
                         btnStartServer.Click += Stop_Click;
                         btnStartServer.Content = "Stop the Server";
-
+                        txtChatName.IsEnabled = false;
                     }
                     catch (Exception ex)
                     {
@@ -362,6 +364,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             try
             {
+                txtChatName.IsEnabled = false;
                 Client = new();
                 await LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
 
@@ -377,6 +380,9 @@ namespace PROG280__Remote_Access_App_Client__
                 }
 
                 Client!.IsConnected = true;
+                
+
+                btnViewRemoteComputer.IsEnabled = true;
 
                 await LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
@@ -384,20 +390,21 @@ namespace PROG280__Remote_Access_App_Client__
 
                 // Use a TaskCompletionSource to create a task that completes when the RemoteWindow is closed
 
-                void RemoteWindow_Closed(object sender, EventArgs e)
+                void MessagingWindow_Closed(object sender, EventArgs e)
                 {
                     tcs.TrySetResult(null); // Signal that the task is completed
                 }
 
                 Client.RemoteWindow = new RemoteWindow(Client);
-
-                Client.RemoteWindow.Closed += RemoteWindow_Closed;
                 Client.RemoteWindow.Show();
 
+                btnViewRemoteComputer.IsEnabled = true;
+
                 Client.MessagingWindow = new MessagingWindow(Client);
+                Client.MessagingWindow.Closed += MessagingWindow_Closed;
                 Client.MessagingWindow.Show();
 
-                // Wait asynchronously for the RemoteWindow to be closed
+                // Wait asynchronously for the MessagingWindow to be closed
                 await tcs.Task;
 
                 if (Client.MessagingWindow != null)
@@ -405,7 +412,10 @@ namespace PROG280__Remote_Access_App_Client__
                     Client.MessagingWindow.Close();
                 }
 
-                //Send disconnect packet
+                btnViewRemoteComputer.IsEnabled = false;
+
+                //Send disconnect packet?
+                txtChatName.IsEnabled = true;
 
                 await Client.CloseConnections();
                 await LocalMessageEvent("Connection closed.");
@@ -415,6 +425,11 @@ namespace PROG280__Remote_Access_App_Client__
 
             }
             
+        }
+
+        private void btnViewRemoteComputer_Click(object sender, RoutedEventArgs e)
+        {
+            Client!.RemoteWindow.Show();
         }
     }
 }

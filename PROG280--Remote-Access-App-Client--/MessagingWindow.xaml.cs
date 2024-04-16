@@ -134,7 +134,7 @@ namespace PROG280__Remote_Access_App_Client__
         private async void btnSendMessage_Click(object sender, RoutedEventArgs e)
         {
             NetworkConnected client = (NetworkConnected)DataContext;
-            client.ChatMessages.Add($"{client.DisplayName}: {txtMessage.Text}");
+            client.ChatMessages.Add($"{client.ChatName}: {txtMessage.Text}");
             await client.SendDataPacket(MessageType.Message, txtMessage.Text);
             txtMessage.Text = "";
         }

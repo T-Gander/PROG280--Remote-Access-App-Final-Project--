@@ -115,7 +115,7 @@ namespace PROG280__Remote_Access_App_Data__
         public int ChunkSize = 1024;
         public int PacketSize = 1500;
 
-        public string? DisplayName { get; set; } = "Lazy User";
+        public string? ChatName { get; set; } = "Lazy User";
 
         public TcpListener? TcpListenerData { get; set; }
         public TcpListener? TcpListenerVideo { get; set; }
@@ -207,7 +207,7 @@ namespace PROG280__Remote_Access_App_Data__
             {
                 // Perform UI-related operations inside this block
                 // For example, adding items to a collection bound to a UI control
-                ChatMessages.Add($"{DisplayName}: {message}");
+                ChatMessages.Add($"{ChatName}: {message}");
             });
         }
 
