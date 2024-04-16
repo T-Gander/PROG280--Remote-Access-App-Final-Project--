@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using PROG280__Remote_Access_App_Data__;
 using PROG2800__Remote_Access_App_Client__.MessagingWindowComponents;
+using SharpHook;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,6 +33,8 @@ namespace PROG280__Remote_Access_App_Client__
 
         private RemoteWindowDataContext _RemoteWindowDataContext = new();
 
+        
+
         public RemoteWindow(NetworkConnected client)
         {
             InitializeComponent();
@@ -58,10 +61,23 @@ namespace PROG280__Remote_Access_App_Client__
             }
         }
 
-        private void frame_Click(object sender, RoutedEventArgs e)
+
+
+        private async void frame_Click(object sender, RoutedEventArgs e)
         {
-            DisplayName _displayNameWindow = new();
-            _displayNameWindow.ShowDialog();
+            //Send a packet to server and set its mouse location.
+            //Figure out where in the window you clicked, and if needed where on the image
+
+            MouseEventArgs mouseEvent = (MouseEventArgs)e;
+            System.Windows.Point mousePosition = mouseEvent.GetPosition(this);
+
+            double xRatio = (double)mousePosition.X / (double)frame.Width;
+            double yRatio = (double)mousePosition.Y / (double)frame.Height;
+
+            System.Windows.Point ratioPoint = new System.Windows.Point(xRatio, yRatio);
+
+            await _Client.SendDataPacket(Packet.MessageType.MouseMove, ratioPoint);
+            //Send mouse packet
         }
     }
 }

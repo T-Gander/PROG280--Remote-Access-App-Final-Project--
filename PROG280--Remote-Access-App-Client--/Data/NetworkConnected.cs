@@ -22,6 +22,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using PROG280__Remote_Access_App_Client__;
 using static PROG280__Remote_Access_App_Client__.RemoteWindow;
+using SharpHook;
 
 
 namespace PROG280__Remote_Access_App_Data__
@@ -30,6 +31,11 @@ namespace PROG280__Remote_Access_App_Data__
     {
         public RemoteWindow RemoteWindow { get; set; }
         public MessagingWindow MessagingWindow { get; set; }
+
+        private double x = SystemParameters.PrimaryScreenWidth;
+        private double y = SystemParameters.PrimaryScreenHeight;
+
+        public EventSimulator MouseSimulator = new EventSimulator();
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -43,6 +49,9 @@ namespace PROG280__Remote_Access_App_Data__
         public delegate void ChatDelegate(string message);
         public event ChatDelegate ChatHandler;
         public event ChatDelegate LocalChatHandler;
+
+        public delegate void RemoteControlDelegate(System.Windows.Point mouseEvent);
+        public event RemoteControlDelegate? RemoteControlHandler;
 
         public bool AcceptReceivingFile = false;
 
@@ -75,6 +84,7 @@ namespace PROG280__Remote_Access_App_Data__
             ChatHandler += HandleChatMessages;
             LocalChatHandler += HandleLocalChatMessages;
             FrameHandler += HandleFrames;
+            RemoteControlHandler += HandleRemoteControl;
         }
 
         private List<byte> frameChunks = new List<byte>();
@@ -153,23 +163,17 @@ namespace PROG280__Remote_Access_App_Data__
             return result == MessageBoxResult.Yes;
         }
 
-        protected async Task SendMessageTypePacket(NetworkStream stream)
-        {
-            Packet ackPacket = new Packet()
-            {
-                ContentType = MessageType.Acknowledgement
-            };
-
-            byte[] ackBytes = new byte[PacketSize];
-
-            Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(ackPacket)).CopyTo(ackBytes, 0);
-
-            await stream.WriteAsync(ackBytes, 0, ackBytes.Length);
-        }
-
         private void HandleFileChunks(byte[] chunk)
         {
             fileChunks.AddRange(chunk);
+        }
+
+        private void HandleRemoteControl(System.Windows.Point mouseEvent)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MouseSimulator.SimulateMouseMovement((short)mouseEvent.X, (short)mouseEvent.Y);
+            });
         }
 
         private void HandleFrameChunks(byte[] chunk)
@@ -382,6 +386,17 @@ namespace PROG280__Remote_Access_App_Data__
 
                             LocalChatHandler($"Received {ReceivingFileName} located at {AppDomain.CurrentDomain.BaseDirectory}\\{ReceivingFileName}.");
 
+                            break;
+
+                        case MessageType.MouseMove:
+                            System.Windows.Point location = JsonConvert.DeserializeObject<System.Windows.Point>(packet.Payload!)!;
+
+                            var a = x * location.X;
+                            var b = y * location.Y;
+
+                            System.Windows.Point convertedLocation = new System.Windows.Point(a, b);
+
+                            RemoteControlHandler(convertedLocation);
                             break;
                     }
                 }
