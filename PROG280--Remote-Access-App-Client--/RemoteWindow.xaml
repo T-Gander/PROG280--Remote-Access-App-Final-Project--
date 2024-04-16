@@ -23,7 +23,13 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Image Grid.ColumnSpan="12" Source="{Binding Path=Frame}"></Image>
+        </Grid.RowDefinitions >
+        <Button Grid.ColumnSpan="12">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Image Source="{Binding Path=Frame}"></Image>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
     </Grid>
 </Window>
