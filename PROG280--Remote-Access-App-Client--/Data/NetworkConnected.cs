@@ -286,26 +286,10 @@ namespace PROG280__Remote_Access_App_Data__
             {
                 while (true)
                 {
-                    var timeout = Task.Run(async () =>
-                    {
-                        await Task.Delay(5000);
-                    });
-
                     _videoStream = TcpClientVideo!.GetStream();
                     byte[] buffer = new byte[PacketSize];
                     int bytesRead = 0;
-
-                    var videoStreamRead = Task.Run(async () =>
-                    {
-                        bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
-                    });
-
-                    await Task.WhenAny(timeout, videoStreamRead);
-
-                    if (timeout.IsCompleted)
-                    {
-                        return null;
-                    }
+                    bytesRead = await _videoStream!.ReadAsync(buffer, 0, buffer.Length);
                     
                     var stringMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                     Packet? packet = JsonConvert.DeserializeObject<Packet>(stringMessage)!;
@@ -334,6 +318,10 @@ namespace PROG280__Remote_Access_App_Data__
                                 }
                                 return frame;
                         }
+                    }
+                    else
+                    {
+                        return null;
                     }
                 }
             }
