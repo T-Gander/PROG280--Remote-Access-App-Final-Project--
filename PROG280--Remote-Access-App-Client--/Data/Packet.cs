@@ -5,7 +5,7 @@ namespace PROG280__Remote_Access_App_Data__
     {
         public enum MessageType
         {
-            FrameChunk, FrameEnd, FileChunk, FileEnd, FileAccept, FileDeny, Message, MouseMove, MouseLeft, MouseRight
+            FrameChunk, FrameEnd, FileChunk, FileEnd, FileAccept, FileDeny, Message, MouseMove
         }
 
         public MessageType ContentType { get; set; }

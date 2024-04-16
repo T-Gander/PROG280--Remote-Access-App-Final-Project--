@@ -23,6 +23,8 @@ using System.Windows.Data;
 using PROG280__Remote_Access_App_Client__;
 using static PROG280__Remote_Access_App_Client__.RemoteWindow;
 using SharpHook;
+using System.Windows.Input;
+using PROG280__Remote_Access_App_Client__.Data;
 
 
 namespace PROG280__Remote_Access_App_Data__
@@ -50,7 +52,7 @@ namespace PROG280__Remote_Access_App_Data__
         public event ChatDelegate ChatHandler;
         public event ChatDelegate LocalChatHandler;
 
-        public delegate void RemoteControlDelegate(System.Windows.Point mouseEvent);
+        public delegate void RemoteControlDelegate(System.Windows.Point mouseEvent, SharpHook.Native.MouseButton button);
         public event RemoteControlDelegate? RemoteControlHandler;
 
         public bool AcceptReceivingFile = false;
@@ -168,11 +170,12 @@ namespace PROG280__Remote_Access_App_Data__
             fileChunks.AddRange(chunk);
         }
 
-        private void HandleRemoteControl(System.Windows.Point mouseEvent)
+        private void HandleRemoteControl(System.Windows.Point mouseEvent, SharpHook.Native.MouseButton button)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 MouseSimulator.SimulateMouseMovement((short)mouseEvent.X, (short)mouseEvent.Y);
+                MouseSimulator.SimulateMousePress(button);
             });
         }
 
@@ -389,14 +392,16 @@ namespace PROG280__Remote_Access_App_Data__
                             break;
 
                         case MessageType.MouseMove:
+
+                            MouseData mouseData = JsonConvert.DeserializeObject<MouseData>(packet.Payload!)!;
                             System.Windows.Point location = JsonConvert.DeserializeObject<System.Windows.Point>(packet.Payload!)!;
 
-                            var a = x * location.X;
-                            var b = y * location.Y;
+                            var a = x * mouseData.MouseLocation.X;
+                            var b = y * mouseData.MouseLocation.Y;
 
                             System.Windows.Point convertedLocation = new System.Windows.Point(a, b);
 
-                            RemoteControlHandler(convertedLocation);
+                            RemoteControlHandler(convertedLocation, mouseData.MouseButton);
                             break;
                     }
                 }

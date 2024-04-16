@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using PROG280__Remote_Access_App_Client__.Data;
 using PROG280__Remote_Access_App_Data__;
 using PROG2800__Remote_Access_App_Client__.MessagingWindowComponents;
 using SharpHook;
+using SharpHook.Native;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -76,8 +78,18 @@ namespace PROG280__Remote_Access_App_Client__
 
             System.Windows.Point ratioPoint = new System.Windows.Point(xRatio, yRatio);
 
-            await _Client.SendDataPacket(Packet.MessageType.MouseMove, ratioPoint);
-            //Send mouse packet
+            MouseData? mouseData = mouseEvent.ChangedButton switch
+            {
+                System.Windows.Input.MouseButton.Left => new MouseData { MouseLocation = ratioPoint, MouseButton = SharpHook.Native.MouseButton.Button1 },
+                System.Windows.Input.MouseButton.Right => new MouseData { MouseLocation = ratioPoint, MouseButton = SharpHook.Native.MouseButton.Button2 },
+                System.Windows.Input.MouseButton.Middle => new MouseData { MouseLocation = ratioPoint, MouseButton = SharpHook.Native.MouseButton.Button3 },
+                _ => null // Unknown mouse button, don't send
+            };
+
+            if (mouseData != null)
+            {
+                await _Client.SendDataPacket(Packet.MessageType.MouseMove, mouseData);
+            }
         }
     }
 }
