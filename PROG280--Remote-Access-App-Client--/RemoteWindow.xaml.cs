@@ -62,7 +62,11 @@ namespace PROG280__Remote_Access_App_Client__
 
                     var frameTask = Task.Run(async () => 
                     {
-                        BitmapImage? frame = await _Client.ReceiveVideoPackets();
+                        Dispatcher.Invoke(() =>
+                        {
+                            BitmapImage? frame = _Client.ReceiveVideoPackets().Result;
+                        });
+                        
                     });
 
                     await Task.WhenAny(timeout, frameTask);
