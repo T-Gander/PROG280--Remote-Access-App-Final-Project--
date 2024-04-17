@@ -432,10 +432,5 @@ namespace PROG280__Remote_Access_App_Client__
         {
             Client!.RemoteWindow.Show();
         }
-
-        private void txtChatName_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ChatName = txtChatName.Text;
-        }
     }
 }
