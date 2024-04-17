@@ -28,10 +28,9 @@
 
         <ListBox ItemsSource="{Binding Path=ChatMessages}" Grid.ColumnSpan="12"></ListBox>
 
-        <TextBox x:Name="txtMessage"  Grid.Row="1" Grid.ColumnSpan="5" VerticalContentAlignment="Center" Height="50"></TextBox>
+        <TextBox x:Name="txtMessage"  Grid.Row="1" Grid.ColumnSpan="7" VerticalContentAlignment="Center" Height="50"></TextBox>
 
-        <Button x:Name="btnSendMessage" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="5" FontSize="20" Height="50" VerticalContentAlignment="Center" Click="btnSendMessage_Click">Send</Button>
-        <Button x:Name="btnSendFiles" Grid.Row="1" Grid.Column="7" Grid.ColumnSpan="3" FontSize="20" Height="50" Margin="5" Click="btnSendFiles_Click">Send File...</Button>
-        <Button x:Name="btnRequestControl"  Grid.Row="1" Grid.Column="10" Grid.ColumnSpan="2" FontSize="20" Height="50" Margin="5" Click="btnRequestControl_Click">Control</Button>
+        <Button x:Name="btnSendMessage" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="7" FontSize="20" Height="50" VerticalContentAlignment="Center" Click="btnSendMessage_Click">Send</Button>
+        <Button x:Name="btnSendFiles" Grid.Row="1" Grid.Column="9" Grid.ColumnSpan="3" FontSize="20" Height="50" Margin="5" Click="btnSendFiles_Click">Send File...</Button>
     </Grid>
 </Window>
