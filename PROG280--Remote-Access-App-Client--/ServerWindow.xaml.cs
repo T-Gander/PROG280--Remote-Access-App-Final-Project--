@@ -76,21 +76,6 @@ namespace PROG280__Remote_Access_App_Client__
 
         public string RemoteIPAddress { get; set; }
 
-        private string _chatName = "Lazy User";
-
-        public string ChatName
-        {
-            get
-            {
-                return _chatName;
-            }
-            set
-            {
-                _chatName = value;
-                OnPropertyChanged(nameof(ChatName));
-            }
-        }
-
         public delegate Task LocalMessageDelegate(string message);
         public event LocalMessageDelegate LocalMessageEvent;
 
@@ -221,6 +206,7 @@ namespace PROG280__Remote_Access_App_Client__
                         btnStartServer.Click += Stop_Click;
                         btnStartServer.Content = "Stop the Server";
                         txtChatName.IsEnabled = false;
+                        Client!.ChatName = txtChatName.Text;
                     }
                     catch (Exception ex)
                     {
@@ -380,6 +366,7 @@ namespace PROG280__Remote_Access_App_Client__
             {
                 txtChatName.IsEnabled = false;
                 Client = new();
+                Client.ChatName = txtChatName.Text;
                 await LocalMessageEvent($"Attempting to connect to {RemoteIPAddress}");
 
                 try
