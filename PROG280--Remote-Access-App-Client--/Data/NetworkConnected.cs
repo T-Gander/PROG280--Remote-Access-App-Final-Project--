@@ -207,7 +207,7 @@ namespace PROG280__Remote_Access_App_Data__
             {
                 // Perform UI-related operations inside this block
                 // For example, adding items to a collection bound to a UI control
-                ChatMessages.Add($"{ChatName}: {message}");
+                ChatMessages.Add($"{message}");
             });
         }
 

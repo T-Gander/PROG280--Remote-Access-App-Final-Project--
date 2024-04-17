@@ -135,7 +135,7 @@ namespace PROG280__Remote_Access_App_Client__
         {
             NetworkConnected client = (NetworkConnected)DataContext;
             client.ChatMessages.Add($"{client.ChatName}: {txtMessage.Text}");
-            await client.SendDataPacket(MessageType.Message, txtMessage.Text);
+            await client.SendDataPacket(MessageType.Message, $"{client.ChatName} {txtMessage.Text}");
             txtMessage.Text = "";
         }
     }
