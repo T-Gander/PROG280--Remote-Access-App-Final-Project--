@@ -388,7 +388,7 @@ namespace PROG280__Remote_Access_App_Client__
 
                 //Changed this, may need testing.
 
-                await LocalMessageEvent($"Connected to {Client.TcpClientData.Client.RemoteEndPoint}");
+                await LocalMessageEvent($"Connected to {RemoteIPAddress}");
 
                 var tcs = new TaskCompletionSource<object?>();
 
