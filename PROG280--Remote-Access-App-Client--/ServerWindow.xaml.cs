@@ -76,7 +76,20 @@ namespace PROG280__Remote_Access_App_Client__
 
         public string RemoteIPAddress { get; set; }
 
-        public string ChatName { get; set; } = "Lazy User";
+        private string _chatName = "Lazy User";
+
+        public string ChatName
+        {
+            get
+            {
+                return _chatName;
+            }
+            set
+            {
+                _chatName = value;
+                OnPropertyChanged(nameof(ChatName));
+            }
+        }
 
         public delegate Task LocalMessageDelegate(string message);
         public event LocalMessageDelegate LocalMessageEvent;
