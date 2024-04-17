@@ -384,10 +384,11 @@ namespace PROG280__Remote_Access_App_Client__
 
                 Client!.IsConnected = true;
                 
-
                 btnViewRemoteComputer.IsEnabled = true;
 
-                await LocalMessageEvent($"Connected to {RemoteIPAddress}");
+                //Changed this, may need testing.
+
+                await LocalMessageEvent($"Connected to {Client.TcpClientData.Client.RemoteEndPoint}");
 
                 var tcs = new TaskCompletionSource<object?>();
 
